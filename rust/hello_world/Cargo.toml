@@ -1,0 +1,10 @@
+[package]
+name = "hello_world"
+version = "0.1.0"
+authors = ["goncalopalaio"]
+proc-macro = true
+
+[dependencies]
+rand = "0.5.5"
+syn = "0.14.4"
+quote = "0.6.3"
