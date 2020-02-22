@@ -1,6 +1,6 @@
 These are mostly scattered notes of what you might find while building an Android application.
 
-As you might notice this document starts with [testing] and [performance]. These are topics that are often left to the end of the project and the source for a lot of  baggage that is not easy to get rid of. At this time they are the topics which always trigger the thought of "what could have I done better to" make this more **testable** or **performant**
+As you might notice this document starts with [testing] and [performance]. These are topics that are often left to the end of the priorities and the source for a lot of  baggage that is not easy to get rid of. At this time they are the topics which always trigger me the thought of "what could have I done better to" make this more **testable** or **performant**
 
 As somewhat of a warning, these are my opinions and always take with a grain of salt what you read in the internet. That said, I  like to think I have a pragmatic approach to most things related to programming. If you read something here and think that that's not the way it's done, at least give the idea some chance. I do not give any guarantee that everything that I write here actually matches with what I do when I work with another people since that's another factor you absolutely need to consider.
 
@@ -8,7 +8,7 @@ As somewhat of a warning, these are my opinions and always take with a grain of 
 
 Let's just start by establishing that the way an Android application is built (the build system, I mean) is super convoluted. It's slow even for the project that you are left with when you create a new project in Android Studio.
 
-How is that related to testing? You want to test what you're doing **fast**, it will be a pain for you to actually iterate your solution if it takes like, more that 5 seconds (optimistic value). If your code relies on Android Libraries, there's a good chance that you won't be able to run the tests locally without entering the world of [mocking libraries] or some sort of [dependency injection library], which will absolutely cause you additional pain because that's now another thing you have to deal with. When possible, keep what you do detached from large Android libraries in another module. It will be easier to test and iterate, only at the cost of extra glue clue to integrate with the rest of the Android code that actually has to exist.
+How is that related to testing? You want to test what you're doing **fast**, it will be a pain for you to actually iterate your solution if it takes like, more that 5 seconds (optimistic value). Keeping in mind the first section, running your tests locally (not in the device) will grant more chances of success in terms of speed. If your code relies on Android Libraries, there's a good chance that you won't be able to run the tests locally without entering the world of [mocking libraries] or some sort of [dependency injection library], which will absolutely cause you additional pain because that's now another thing you have to deal with. When possible, keep what you do detached from large Android libraries in another module. It will be easier to test and iterate, only at the cost of extra glue clue to integrate with the rest of the Android code that actually has to exist.
 
 ## What about User Interface stuff?
 
