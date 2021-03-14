@@ -237,6 +237,11 @@ pub fn main() !void {
     }
     log("boom: {}\n", .{blowing_up});
 
+    var fizz_out: u8 = 3;
+    while(fizz_out > 0) : (fizz_out -= 1) {
+        log("going out: {}\n", .{fizz_out});
+    }
+
 
     var vanishing: u8 = 2;
     while (vanishing < 101) {
@@ -469,7 +474,174 @@ pub fn main() !void {
 
     log("my_vec4: {}\n", .{my_vec4});
 
+    // For structs one level of dereferencing is done when accessing fields.
+    // Notice the calls to self.x and y in the swap function.
+
+    var my_stuff = Stuff {
+        .x = 100,
+        .y = 200,
+    };
+
+    log("my_stuff: {}\n", .{my_stuff});
+    my_stuff.swap();
+    log("my_stuff: swapped: {}\n", .{my_stuff});
+
+    // Unions
+    // Allows you to define types which store one value of many possible typed fields. Only one field may be active at one time.
+
+    const Payload = union {
+        int: i64,
+        float: f64,
+        bool: bool,
+    };
+
+    var payload = Payload {.int = 1234};
+    // playload.float = 12.34; // cannot do this
+
+    // Tagged unions
+    // Unions that use an enum to detect which field is active.
+
+    const Tag = enum { a, b, c };
+    const Tagged = union(Tag) {a: u8, b: f32, c: bool};
+
+    var my_value = Tagged {.b = 1.5};
+    switch (my_value) {
+        .a => |*byte| byte.* += 1,
+        .b => |*float| float.* *= 2,
+        .c => |*b| b.* = !b.*,
+    }
+
+    log("my_value.b will be 3: {}\n", .{my_value.b});
+
+    // The tag type of a tagged union can also be inferred:
+    const TaggedInferred = union(enum) {a: u8, b: f32, c: bool};
+    var my_value_inf = Tagged {.c = true};
+    log("my_value_inf.c: {}\n", .{my_value_inf.c});
+
+    // void member types can have their type omitted from the syntax. Here none and stuff are of type void:
+    // (?) note: not entirely sure what's the point of this.
+    const Tagged2 = union(enum) {a: u8, b: f32, none, stuff};
+    
+    // Integer rules
+
+    const decimal_int: i32 = 98222;
+    const hex_int: u8 = 0xff;
+    const octal_int: u16 = 0o755;
+    const binary_int: u8 = 0b11110000;
+    
+    // Underscores may be placed as a visual separator.
+
+    const permissions: u64 = 0o7_5_5;
+    const te: i32 = 1_0;
+
+    // Integer widening is allowed:
+    const aa: u8 = 250;
+    const bb: u16 = aa;
+    log("same value: {} == {} = {}\n", .{aa,bb, aa == bb});
+
+    // If you have a value that cannot be coerced into the type, @intCast can be used to convert. If the value is out of range it's a detectable illegal behaviour.
+    const xx: u64 = 200;
+    const yy = @intCast(u8, xx);
+    log("coerced: {} into {}\n", .{xx, yy});
+
+    // Integers by default are not allowed to overflow. This is detectable illegal behaviour.
+    // For uses cases where overflow is expected the language provides overflow operators.
+    var pp: u8 = 255;
+    pp +%=1;
+    log("overflowed to 0: {}\n", .{pp});
+
+    // Floats
+    // Floats are stricly IEEE compliant unless @setFloatMode(.Optimized) is used (equivalent to gcc ffast-math)
+
+    // Widening is also supported:
+
+    const tt: f16 = 1.0;
+    const ll: f32 = a;
+
+    // Multiple kinds of literals are supported:
+    // Underscores can also be placed between digits.
+
+    const fa: f64 = 123.0;
+    const fb: f64 = 123.0E+77;
+    const fc: f64 = 123.0e+77;
+    const hex_fj: f64 = 0x103.70p-5;
+    const hex_fr: f64 = 0x103.70;
+    const hex_ft: f64 = 0x103.70P-5;
+
+    // Integers and floats may be converted using @intToFloat, @floatToInt.
+    // @intToFloat is always safe, @floatToInt is detectable illegal behaviour when the float value cannot fit into the integer destination type.
+
+    const qa: i32 = 0;
+    const qf = @intToFloat(f32, qa);
+    log("same value: {} == {} = {}\n", .{qa, qf, qa == qf});
+
+    // Labelled blocks.
+    // Blocks are expressions and can be given labels, which can be used to yield values.
+
+    const my_count = my_blk: {
+        var sum: u32 = 0;
+        var i: u32 = 0;
+        while (i < 10) : (i += 1) sum += i;
+        break :my_blk sum;
+    };
+
+    log("my_count: {}\n", .{my_count});
+
+    // Labelled loops:
+    // Loops can be given labels, allowing you to break and continue to outer loops.
+
+    var q_count: usize = 0;
+    outer: for ([_]i32 {1,2,3,4}) |_| {
+        for ([_]i32 {1,2,3,4}) |_| {
+            q_count += 1;
+            continue :outer;
+        }
+    }
+    log("q_count: {}\n", .{q_count});
+
+    // Loops as expressions.
+    // break accepts a value. This can be used to yield a value from a loop.
+    // Loops also have an else branch. It's evaluated when the loop is not exited from with a break;
+    log("range has number: {}\n", .{rangeHasNumber(0, 10, 3)});
+    log("range has number: {}\n", .{rangeHasNumber(0, 10, 30)});
+
+    // Optionals
+    // Use the syntax *T and are used to store data, null or a value of type T.
+
+    var found_index: ?usize = null;
+    const ee = [_]i32 {1, 2, 3, 4};
+    found_index = findIndexOf(ee, 5);
+    log("found_index: {}\n", .{found_index});
+    log("found_index: {}\n", .{findIndexOf(ee, 1)});
+
+    // TODO orelse 
+
 }
+
+fn findIndexOf(arr: [4]i32, number: i32) ?usize {
+    for(arr) |v, i| {
+        if (v == number) return 1;
+    }
+    return null;
+}
+
+fn rangeHasNumber(begin: usize, end: usize, number: usize) bool {
+    var i = begin;
+    return while(i < end) : (i += 1) {
+        if (i == number) break true;
+    } else false;
+}
+
+const Stuff = struct {
+    x: i32,
+    y: i32,
+
+    fn swap(self: *Stuff) void {
+        const tmp = self.x;
+        self.x = self.y;
+        self.y = tmp;
+    }
+};
 
 const Suit = enum {
     var count: u32 = 0;
