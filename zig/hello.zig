@@ -348,7 +348,7 @@ pub fn main() !void {
             potato = -potato;
         },
         10, 100 => {
-            potato = @divExact(potato, 10); // special considerations must be made when dividing signed integers ((?) - TODO check what this means exactly)
+            potato = @divExact(potato, 10); // Special considerations must be made when dividing signed integers ((?) - TODO check what this means exactly)
         },
         else => {},
     }
@@ -372,8 +372,133 @@ pub fn main() !void {
         log("tomato has other value: {}\n", .{tomato});
     }
 
-    // TODO Runtime Safety
+    // Runtime Safety like checking array bounds is enabled by default. Some types of builds might disabled though (more below)
 
+    // Unreachable is an assertion that the statement will not be reached. Used to tell the compiler the a branch is impossible (fore optimization reasons). Reaching unreachable is detectable illegal behaviour.
+
+    const yu: u32 = 1;
+    // const ya: u32 = if (x == 10) else unreachable // Will throw error during runtime
+
+    const a_upper = asciiToUpper('a');
+    const a_upper_str = [_]u8 {a_upper};
+    log("Upper a: {s}\n", .{a_upper_str});
+
+    // Pointers
+    // Normal pointers aren't allowed to have 0 or null as a value.
+    // *T where T is the child type.
+    // Referencing: &variable
+    // De-referencing: variable.*
+    var ko: u8 = 1;
+    increment(&ko);
+    log("ko: {}\n", .{ko});
+
+    var ka: u16 = 0;
+    // var ke: *u8 = @intToPtr(*u8, ka); // detectable illegal behaviour.
+
+    // const pointers cannot be used to modify the referenced data.
+
+    const ke: u8 = 1;
+    var ki = &ke; // ki is: *const u8
+    // ki.* += 1; // compilation error
+
+    // Many-Item Pointers
+    // For pointers to an unknown amount of elements: [*]T
+    // This supports indexing, pointer arithmetic and slicing.
+
+    // Slices
+    // Slices are like a pair [*]T (pointer to data) and usize (element count)
+
+    const pa = [_]u8 { 65, 66, 67, 68, 69, 70 };
+    const pa_slice = pa[0..3]; // Slice pa[n..m] -> elements from n to (m - 1)
+    log("pa_slice sum: {}\n", .{total_slice(pa_slice)});
+
+    // When n and m are both known at compile time, slicing will produce a pointer to an array (*[N]T will coerce to a []T)
+    log("pa_slice has expected type *const [3]u8: {s} :: {s}\n", .{@TypeOf(pa_slice), @TypeOf(pa_slice) == *const [3]u8});
+
+    var pa_sliced_to_the_end = pa[0..];
+    log("pa sliced to the end: {s} -> {s}\n", .{pa, pa_sliced_to_the_end});
+
+
+    // Enums
+
+    const Direction = enum {north, south, east, west };
+    const Value = enum(u2) {zero, one, two}; // They can have specified integer tag types
+    log("Value: 0 -> {} :: 1 -> {} :: 2 -> {} \n", .{@enumToInt(Value.zero), @enumToInt(Value.one), @enumToInt(Value.two)});
+
+    // Values can be overridden, the next values continue from there
+    
+    const Value2 = enum(u32) {
+        hundred = 100,
+        thousand = 1000,
+        million = 1000000,
+        next
+    };
+
+    log("Value: million -> {} :: next (1000001) -> {}\n", .{@enumToInt(Value2.million), @enumToInt(Value2.next)});
+
+    // Methods can be given to enums (note: apparently only when global scoped)
+    log("isClubs: {}\n", .{Suit.spades.isClubs()});
+    // Enums can also be given var and const declarations. Their values are unrelated and unattached to instances of the enum type (note: like static in java)
+    Suit.count += 1;
+
+    // Structs
+
+    const Vec3 = struct {
+        x: f32, y: f32, z: f32
+    };
+
+    const my_vector = Vec3 {
+        .x = 0,
+        .y = 100,
+        .z = 50,
+    };
+
+    log("my_vector: {}\n", .{my_vector});
+
+    // Fields can be given defaults
+
+    const Vec4 = struct {
+        x: f32, y: f32, z: f32 = 0, w: f32 = undefined
+    };
+
+    const my_vec4 = Vec4 {
+        .x = 25,
+        .y = 40,
+        .w = 100,
+    };
+
+    log("my_vec4: {}\n", .{my_vec4});
+
+}
+
+const Suit = enum {
+    var count: u32 = 0;
+    clubs,
+    spades,
+    diamonds,
+    hearts,
+
+    pub fn isClubs(self: Suit) bool {
+        return self == Suit.clubs;
+    }
+};
+
+fn total_slice(values: []const u8) usize {
+    var count: usize = 0;
+    for (values) |v|  count += v;
+    return count;
+}
+
+fn increment (num: *u8) void {
+    num.* += 1;
+}
+
+fn asciiToUpper(x: u8) u8 {
+    return switch(x) {
+        'a' ... 'z' => x + 'A' - 'a',
+        'A' ... 'Z' => x,
+        else => unreachable,
+    };
 }
 
 fn createFile() !void {
@@ -406,7 +531,7 @@ fn failFn() error{Oops}!i32 {
 
 fn payloadCapturingExample() !void {
     failingFunction() catch |err| {
-        log("[ERROR] Error: {}\n", .{err});
+        log("Error: {}\n", .{err});
         if (err == error.Oops) {
             log("Oops\n", .{});
         }
