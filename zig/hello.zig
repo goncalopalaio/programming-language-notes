@@ -17,6 +17,7 @@ const std = @import("std");
 const expect = std.testing.expect;
 const assert = std.debug.assert;
 const os = std.os;
+const eql = std.mem.eql;
 
 /// Stores a timestamp
 /// This is a multiline doc comment.
@@ -614,8 +615,196 @@ pub fn main() !void {
     log("found_index: {}\n", .{found_index});
     log("found_index: {}\n", .{findIndexOf(ee, 1)});
 
-    // TODO orelse 
+    // orelse is supported by options. It can be used when the optional is null, it unwraps it and provides a fallback value
+    var t4: ?f32 = null;
+    var t5 = t4 orelse 0;
+    log("t6 should be zero: {} :: type: {}\n", .{t5 == 0, @TypeOf(t5) == f32});
 
+    // When you know it's impossible for an optional value to be null you can use .? as a shorthand for orelse unreachable. Using this unwrapped value when it's null is detectable illegal behaviour.
+
+    const t6: ?f32 = 5;
+    const t7 = t6 orelse unreachable;
+    const t8 = t6.?;
+    log("t7 is equivalent to t8 -> {} == {}\n", .{t7, t8});
+
+    // If optional payload capture:
+
+    // This:
+    const o1: ?i32 = 5;
+    if (o1 != null) {
+        const value = o1.?;
+    }
+
+    // Is equivalent to this:
+    const o2: ?i32 = 5;
+    if (o2) |value| {}
+
+    // You can also use it in a while:
+    var sum: u32 = 0;
+    while(eventuallyNullSequence()) |value| {
+        sum += value;
+    }
+    log("sum: {}\n", .{sum});
+
+    // Comptime.
+    // Code executed at compile time.
+    // You can use comptime in variables or as blocks (including calling functions if everything in them can be run during compilation time).
+
+    var x1 = comptime fibonacci(10);
+    comptime var x2 = fibonacci(10);
+    var x3 = comptime blk: {
+        break :blk fibonacci(10);
+    };
+    log("x1: {} x2: {} x3: {}\n", .{x1, x2, x3});
+
+    // Function parameters can also be tagged as comptime.
+    // note: PascalCase functions return a type (this is why TypeOf starts with upper case)
+    log("Comparing two types: {} == {} = {}\n", .{Matrix(f32, 4, 4), [4][4]f32, (Matrix(f32, 4, 4) == [4][4]f32)});
+
+    // You can reflect upon types using the built-in @typeInfo
+    const si = addSmallInts(u16, 20, 30);
+    log("si: {}\n", .{si});
+
+    // note: .{} is the anonymous struct syntax.
+
+    // @Type function creates a type from a @typeInfo
+    log("a bigger int: {} {}\n", .{u8, GetABiggerInt(u8)});
+
+    // Returning a struct type is how you make generic data structures.
+
+    const v1 = Vec(3, f32).init([_] f32 {10, -10, 5});
+    const v2 = v1.abs();
+
+    log("using std.mem.eql to compare two slices: {} {} -> {}\n", .{v1, v2, eql(f32, &v2.data, &[_]f32 {10, 10, 5})});
+
+    // The types of function parameters cal also be inferred by using anytype in place of a type. @TypeOf can then be used on the parameter
+    const t9 = 10;
+    log("{} {}\n", .{plusOne(t9), @as(u32, 1)});
+
+    // Comptime also has operators ++ and ** for concatenating and repeating arrays and slices. These operators only work at comptime.
+
+    const t10 = [4]u8 {70, 71, 72, 73};
+    const t11 = t10[0..];
+
+    const joined = t10 ++ t11;
+    const repeated = t10 ** 4;
+    log("joined: {s} repeated: {s}\n", .{joined, repeated});
+
+    // Payload captures
+    // Used to capture the value or something, for example in if statements and optionals
+    var maybe_num: ?usize = 10;
+    if (maybe_num) |n| {
+        //expect(@TypeOf(n) == usize);
+        //expect(n == 10);
+    } else {
+        unreachable;
+    }
+    // With while loops and error unions:
+    var summing: ?u32 = 10;
+    while (itWillFailEventually()) |value| {
+        if (value == 1) {
+            summing.? += value;
+        }
+    } else |err| {
+        log("error! {}\n", .{err});
+    }
+    log("summing! {}\n", .{summing});
+    
+
+    // Pointer capture.
+    // It's also possible to modify captured values by taking the as pointers using the |*value| syntax.
+    const abc = [_]u8 {'a', 'b', 'c'};
+    var my_data = [_]u8 {'a', 'b', 'c'};
+    for (my_data) |*byte| byte.* += 1;
+    log("Pointer capture: {s} -> {s}\n", .{abc, my_data});
+
+    // Inline loops.
+    // There's the option to unroll loops at compile time. Using this for performance reasons is inadvisable unless you've tested it. The compiler tends to make better decisions here than you.
+    var t_sum: usize = 0;
+    const t_types = [_]type {i32, f32, u8, bool };
+    inline for (t_types) |T| t_sum += @sizeOf(T);
+    log("Type sum: {}\n", .{t_sum});
+
+    // Opaque
+    // opaque types have an unknown (non-zero) size and alignment. These types cannot be stored directly. These are used to maintain type safety with pointers to types we don't have information about.
+    // for example extern functions (from C).
+    // const Window = opaque {};
+    // extern fn show_window(*Window) callconv(.C) void;
+    // var main_window: *Window = undefined;
+    // show_window(main_window);
+    // Opaque types may have declarations in their definitions
+    // const Window = opaque {
+    //  fn show(self: *Window) void {
+    //   show_window(self);
+    //  }
+    // }
+
+    // TODO Anonymous structs
+}
+
+var numbers_left2: u32 = undefined;
+
+fn itWillFailEventually() !u32 {
+    return if (numbers_left2 == 0) error.ReachedZero else blk: {
+        numbers_left2 -= 1;
+        break :blk numbers_left2;
+    };
+}
+
+fn plusOne(x: anytype) @TypeOf(x) {
+    return x + 1;
+}
+
+fn Vec(comptime count: comptime_int, comptime T: type) type {
+    return struct {
+        data: [count]T,
+        const Self = @This(); // Gets the type of the innermost struct, union or enum.
+
+        fn abs(self: Self) Self {
+            var tmp = Self { .data = undefined };
+
+            for (self.data) |elem, i| {
+                tmp.data[i] = if (elem < 0) -elem else elem;
+            }
+
+            return tmp;
+        }
+
+        fn init(data: [count]T) Self {
+            return Self {.data = data };
+        }
+    };
+}
+
+fn GetABiggerInt(comptime T: type) type {
+    // @Type function creates a type from a @typeInfo
+    return @Type(
+        .{
+            .Int = .{
+                .bits = @typeInfo(T).Int.bits + 1,
+                .signedness = @typeInfo(T).Int.signedness,
+            },
+        }
+    );
+}
+
+fn addSmallInts(comptime T: type, a: T, b: T) T {
+    return switch(@typeInfo(T)) {
+        .ComptimeInt => a + b,
+        .Int => |info| if (info.bits <= 16) a + b else @compileError("ints are too large"),
+        else => @compileError("only ints are accepted"),
+    };
+}
+
+fn Matrix (comptime T: type, comptime width: comptime_int, comptime height: comptime_int) type {
+    return [height][width]T;
+}
+
+var numbers_left: u32 = 4;
+fn eventuallyNullSequence() ?u32 {
+    if (numbers_left == 0) return null;
+    numbers_left -= 1;
+    return numbers_left;
 }
 
 fn findIndexOf(arr: [4]i32, number: i32) ?usize {
