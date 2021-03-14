@@ -8,6 +8,9 @@
 //! Run the tests with:
 //! zig test hello.zig
 
+
+// M1 install: ➜ brew install zig --HEAD
+
 // Top-level declarations are order-independent. Notice the std declaration after it's used.
 const log = std.debug.print;
 const std = @import("std");
@@ -49,6 +52,8 @@ pub fn main() !void {
     // Comments
     // Hello, this is a comment.
     // Use 3 slashes for Doc comments
+
+    // Variables use snake case, functions camelCase.
 
     // A few primitive types
 
@@ -97,13 +102,13 @@ pub fn main() !void {
 
     // Error union
     var number_or_error: anyerror!i32 = error.ArgNotFound;
-    log("Error union 1\ntype: {s}\nvalue: {}\n", .{
+    log("Error -> union 1\ntype: {s}\nvalue: {}\n", .{
         @typeName(@TypeOf(number_or_error)),
         number_or_error,
     });
 
     number_or_error = 1234;
-    log("Error union 2\ntype: {s}\nvalue: {}\n", .{
+    log("Error -> union 2\ntype: {s}\nvalue: {}\n", .{
         @typeName(@TypeOf(number_or_error)),
         number_or_error,
     });
@@ -139,7 +144,7 @@ pub fn main() !void {
 
     // In addition to the regular integer types you can have arbitraty bit-width integers.
     // for example:
-    var a_7_bit_integer: i7 = 1234;
+    var a_7_bit_integer: i7 = 40;
 
     // Primitive values
     // true and false
@@ -147,7 +152,286 @@ pub fn main() !void {
     // undefined - leave value unspecified.
 
     // TODO: https://ziglang.org/documentation/master/#toc-String-Literals-and-Unicode-Code-Point-Literals
+
+
+    // Compile time expressions
+    comptime {
+        var t = 0;
+        t += 1;
+        t += 1;
+
+        if (t == 2) {
+            // log("t is for sure 2: {t}", .{t}); -- This will fail since it requires runtime stuff to run.
+        } else {
+            @compileError("wrong value");
+        }
+    }
+
+    comptime var a: i32 = 1000;
+    comptime var c: i32 = undefined;
+
+    comptime {
+        a = fibonacci(7);
+        var b: i32 = fibonacci(9);
+        c = fibonacci(10);
+    }
+
+    // note: expressions in global scope are implicitly comptime expressions. We can even use functions to initialize complex data there.
+
+    log("comptime fibonacci stuff: {} {}\n", .{a, c});
+
+    log("runtime fibonacci stuff: {}\n", .{fibonacci(7)});
+
+    // Assignment
+
+    const constant_a: i32 = 5;
+    var variable_a: u32 = 1000;
+
+    // @as performs an explicit type coercion
+
+    const inferred_constant = @as(i32, 5);
+    const inferred_variable = @as(u32, 5000);
+
+    const has_to_have_a_value_a: i32 = undefined;
+    var has_to_have_a_value_b: i32 = undefined;
+
+    // Arrays
+
+    const arr_a = [2]u8 {'h', 'i'};
+    const arr_b = [_]u8 {'h', 'i'};
+
+    log("arr_a as a string: {s}\n", .{arr_a});
+    log("arr_a.len: {}\n", .{arr_a.len});
+    log("arr_a: {} {}\n", .{arr_a[0], arr_a[1]});
+
+    // If statements
+    // No truthy or falsy values, only bool values are supported
+
+    const going_to_explode = true;
+    var explosion_size: u16 = 0;
+
+    if (going_to_explode) {
+        explosion_size += 1;
+    }
+
+    if (explosion_size == 0) {
+        explosion_size -= 1;
+    } else if (explosion_size == 1) {
+        explosion_size *= 1;
+    } else {
+        explosion_size = 0;
+    }
+
+    // If statements can work as expressions
+
+    const fuel: i32 = 1000;
+    explosion_size += if (fuel >= 10) 10 else 0;
+
+    log("explosion: {}\n", .{explosion_size});
+
+    // While loops
+
+    var blowing_up: u8 = 2;
+    while (blowing_up < 100) {
+        blowing_up *= 2;
+    }
+    log("boom: {}\n", .{blowing_up});
+
+
+    var vanishing: u8 = 2;
+    while (vanishing < 101) {
+        vanishing += 1;
+
+        if (vanishing % 2 == 0) {
+            continue;
+        }
+
+        if (vanishing > 50) {
+            break;
+        }
+    }
+    log("vanishing: {}\n", .{vanishing});
+
+    // For loops
+
+    const color_ids = [_]u8 {'a', 'b', 'c'};
+
+    for (color_ids) |character, index| {
+        log("1: color_ids: char: {} idx: {}\n", .{character, index});
+    }
+
+    for (color_ids) |character| {
+        log("2: color_ids: char: {}\n", .{character});
+    }
+
+    for (color_ids) |_, index| {
+        log("3: color_ids: idx: {}\n", .{index});
+    }
+
+    for (color_ids) |_| {
+        log("4: hey\n", .{});
+    }
+
+
+    // Defer will execute a statement while exiting the current block
+    // Multiple defers will be executed in reverse order
+
+    var late_to_the_party: i16 = 0;
+
+    {
+        defer late_to_the_party += 1;
+        if (late_to_the_party == 0) log("I'm still at zero\n", .{});
+    }
+    log("Check me out, I'm one: {}\n", .{late_to_the_party});
+
+    for (color_ids) |_| {
+        defer log("5: I will be printed each time at the end of the loop\n", .{});
+        log("5: Hello\n", .{});
+    }
+
+    {
+        defer log("!\n", .{});
+        defer log("i", .{});
+        defer log("H", .{});
+    }
+
+    // Error set is like an enum. There are no exceptions, errors are values.
+
+    const FileOpenError = error {
+        AccessDenied,
+        OutOfMemory,
+        FileNotFound,
+    };
+
+    // Error sets coerce to their super sets.
+    const AllocationError = error {
+        OutOfMemory,
+    };
+    const another_err: FileOpenError = AllocationError.OutOfMemory;
+
+    // Error union types
+    // An error set type and a normal type can be combined with the ! operator to for an error union type.
+
+    const maybe_error: AllocationError!u16 = 10;
+    const no_error = maybe_error catch 0;
+
+    // catch is used followed by an expression to provide a fallback value (noreturn could also be used (?))
+    log("Do we have the expected no_error type: {}\n", .{@TypeOf(no_error) == u16});
+
+    // Example with payload capturing to take the value of the error from a function
+    payloadCapturingExample() catch noreturn;
+
+    // Try is a shortcut for x catch |err| return err
+    var an_example = tryExample();
+    log("This should be the value from the catch {}\n", .{an_example});
+
+    // Errdefer works like defer but only executes when the function is returned from with an error (within the errdefer block).
+    var bn_example = errDeferExample() catch 20;
+    log("bn_example: {} some_problem: {}\n", .{bn_example, some_problem});
+
+    // Error unions return from a function can have their error sets inferred so it's possible to omit it in the return type.
+    const this_failed: error{AccessDenied}!void = createFile();
+
+    // Error sets can be merged
+
+    const SetOfErrorsA = error { NotDir, PathNotFound };
+    const SetOfErrorsB = error { OutOfMemory, PathNotFound};
+    const SetOfErrorsC = SetOfErrorsA || SetOfErrorsB;
+
+    // There's anyerror which is the global error set (a superset of all error sets). It's usage should be generally avoided.
+
+    // Switch statements. Must be exaustive, there's no fall through, all branches must coerce to the same type. Can be used as an expression.
+
+    var potato: i8 = 10;
+    switch(potato) {
+        -1...1 => {
+            potato = -potato;
+        },
+        10, 100 => {
+            potato = @divExact(potato, 10); // special considerations must be made when dividing signed integers ((?) - TODO check what this means exactly)
+        },
+        else => {},
+    }
+
+    if (potato == 1) {
+        log("potato: {}\n", .{potato});
+    } else {
+        log("potato has other value: {}\n", .{potato});
+    }
+
+    const decider: i8 = 10;
+    var tomato = switch (decider) {
+        -1...1 => -x,
+        10, 100 => @divExact(decider, 10),
+        else => decider,
+    };
+
+    if (tomato == 1) {
+        log("tomato: {}\n", .{tomato});
+    } else {
+        log("tomato has other value: {}\n", .{tomato});
+    }
+
+    // TODO Runtime Safety
+
 }
+
+fn createFile() !void {
+    // Error unions return from a function can have their error sets inferred so it's possible to omit it in the return type.
+    return error.AccessDenied;
+}
+
+var some_problem: u32 = 0;
+fn errDeferExample() error{Oops}!u8 {
+    errdefer some_problem += 1;
+
+    try failingFunction();
+
+    return 155;
+}
+
+fn tryExample() i16 {
+    var a_value = failFn() catch |err| {
+        return 110;
+    };
+
+    return 0;
+}
+
+fn failFn() error{Oops}!i32 {
+    try failingFunction();
+
+    return 12;
+}
+
+fn payloadCapturingExample() !void {
+    failingFunction() catch |err| {
+        log("[ERROR] Error: {}\n", .{err});
+        if (err == error.Oops) {
+            log("Oops\n", .{});
+        }
+        return;
+    };
+
+    log("not reachable\n", .{});
+}
+
+fn failingFunction() error{Oops}!void {
+    return error.Oops;
+}
+
+fn fibonacci(index: i32) i32 {
+    if (index < 2) return index;
+    return fibonacci(index - 1) + fibonacci(index - 2);
+}
+
+// All aggregate types are anonymous, to give it a type, assign it to a constant:
+
+const Node = struct {
+    next: *Node,
+    name: []u8,
+};
+
 
 test "comments" {
     const x = true; // This is a comment!
@@ -156,3 +440,94 @@ test "comments" {
     // Run this test by running:
     // zig test hello.zig
 }
+
+test "undefined leaves variables uninitialized" {
+    var g: i32 = undefined;
+    g = 1;
+    expect(g == 1);
+
+    const y = undefined;
+}
+
+var z: i32 = add(10, k);
+const k: i32 = add(12, 34);
+
+test "things on global scope are order independent, const global variables are comptime-known (as opposed to runtime-known" {
+    expect(k == 46);
+    expect(z == 56);
+}
+
+fn add(a: i32, b: i32) i32 {
+    return a + b;
+}
+
+
+test "Global variables can be declared inside struct, union or enum" {
+    expect(foo() == 1235);
+    expect(foo() == 1236);
+
+    U.f += 1;
+    expect(U.f == 2);
+}
+
+const U = struct {
+    var f: i32 = 1;
+};
+
+fn foo() i32 {
+    const S = struct {
+        var a: i32 = 1234;
+    };
+    S.a += 1;
+
+    return S.a;
+}
+
+// threadlocal variables currently don't work on Mac M1: https://github.com/ziglang/zig/issues/8216 
+// 
+// threadlocal var q: i32 = 100;
+// 
+// test "thread local storage" {
+//     const t1 = try std.Thread.spawn(testThreadLocalStorage, {});
+//     const t2 = try std.Thread.spawn(testThreadLocalStorage, {});
+// 
+//     testThreadLocalStorage({});
+// 
+//     t1.wait();
+//     t2.wait();
+// }
+// 
+// fn testThreadLocalStorage(context: void) void {
+//     assert(q == 100);
+//     q += 1;
+//     assert(q == 101);
+// }
+
+
+// I would expect that x in S.x would be scoped differently but apparently the declaring var x inside would shadow the existing x. inside S, x would be x and it already exists (? - wonky explanation here)
+// const S = struct {
+//     var x: i32 = 11111;
+// };
+// 
+// var x: i32 = 9999;
+// 
+// pub fn main() !void {
+//     S.x = 1;
+//     x = 9;
+// }
+
+test "comptime vars" {
+    var x: i32 = 1;
+    comptime var y: i32 = 1;
+
+    x += 1;
+    y += 1;
+
+    expect(x == 2);
+    expect(y == 2);
+
+    if (y != 2) {
+        @compileError("wrong y value");
+    }
+}
+
