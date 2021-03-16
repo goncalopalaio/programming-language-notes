@@ -739,7 +739,130 @@ pub fn main() !void {
     //  }
     // }
 
-    // TODO Anonymous structs
+    // Anonymous struct literal
+    const P1 = struct {x: i32, y: i32};
+
+    var pt: P1 = .{
+        .x = 13,
+        .y = 67,
+    };
+
+    log("p1: {} {}\n", .{pt.x, pt.y});
+
+    // Anonymous structs can be completely anonymous (without being coerced into another struct type)
+
+    dump(.{
+        .a = @as(u32, 1234),
+        .b = @as(f64, 12.4),
+        .s = "hello",
+    });
+
+    // Tuples. These are anonymous structs without field names. Also support ++ and ** operators as structs do.
+    // Inline loop must be used to iterate over the tuple.
+    // Internally they have numbered field names starting at 0. May be accessed with the special syntax: @"0".
+    // Things inside @"" are recognized as identifiers.
+
+    const my_tuple = .{ 
+            @as(i32, 1234),
+            @as(f64, 12.32),
+            true,
+            "hi"
+        } ++ .{false} ** 2;
+
+    inline for (my_tuple) |v, i| {
+        const my_type = @TypeOf(v);
+        if (my_type == i32 or my_type == f64) {
+            std.debug.print("|{}| -> |{}| \n", .{i, v});
+        } else {
+            std.debug.print("|{}| -> |{s}|\n", .{i, v});    
+        }
+
+    }
+
+    log("my_tuple: len={}\n", .{my_tuple.len});
+    log("my_tuple: @\"{}\" = {}\n", .{0, my_tuple.@"0"});
+    const at = my_tuple.@"3"[0];
+    const af = [_]u8 {at};
+    log("my_tuple: @\"{}\" = {} {s}\n", .{3, at, af});
+
+    // Sentinel termination
+    // Arrays, slices and many pointers may be terminated by a value of their child type
+
+    const terminated_with_0_byte = [3:0]u8 {73, 72, 71};
+    log("terminated_with_0_byte   len will be 3:  |{s}| --> {}\n", .{terminated_with_0_byte, terminated_with_0_byte.len});
+
+    const terminated_with_80_byte = [3:80]u8 {73, 72, 71};
+    log("terminated_with_80_byte  len will be 3:  |{s}| --> {}\n", .{terminated_with_80_byte, terminated_with_80_byte.len});
+
+    // Using @bitCast to do an unsafe bitwise type conversion just to prove that the actual last element of the array has the sentinel byte.
+    const k1 = @bitCast([4]u8, terminated_with_0_byte);
+    const k2 = @bitCast([4]u8, terminated_with_80_byte);
+
+    for (k1) |v| {
+        log("bytes: {}\n", .{v});
+    }
+    log("---\n", .{});
+
+    for (k2) |v| {
+        log("bytes: {}\n", .{v});
+    }
+    log("---\n", .{});
+
+    // Sentinel terminated types coerce to their non-sentinel-terminated counterparts.
+    var k3: [*:0]u8 = undefined;
+    const k4: [*]u8 = k3;
+    var k5: [4:0]u8 = undefined;
+    const k6: [4]u8 = k5;
+
+    // Sentinel terminated slicing is supported:
+    const k7 = [_:0]u8 { 255 } ** 4;
+    const k8 = k7[0..4: 0];
+    const k9 = k7[0..2];
+    
+    // Vectors
+    // Vector types for SIMD. Check Arraylist for "resizable storage"
+    // Can only have boolean, integers, floats and pointers as child types.
+    // Operations are performed on each of the values in the vector.
+
+    const vx: std.meta.Vector(4, f32) = .{1, -10, 20, -1};
+    const vy: std.meta.Vector(4, f32) = .{2, 10, 0, 1};
+
+    const vz = vx + vy;
+
+    // Using std.meta.eql to check equality:
+    const v_result = std.meta.eql(vz, std.meta.Vector(4, f32) {3, 0, 20, 0});
+    log("vectors: expected result -> {}\n", .{v_result});
+
+    // They are indexable:
+    log("vx[1]: {}\n", .{vx[0]});
+
+    // Using @splat to construct a vector where all the values are the same:
+    const vt = vz * @splat(4, @as(f32, 2));
+
+    // They do not have a len field but may still be looped:
+    var v_sum: f64 = 0;
+    var v_idx: u8 = 0;
+    while (v_idx < std.mem.len(vt)) : (v_idx += 1) {
+        v_sum += vt[v_idx];
+    }
+    log("vt_sum: {}\n", .{v_sum});
+
+    // Vectors coerce to their respective arrays:
+    const v_arr: [4]f32 = vt;
+
+    // Note from ziglearn.org:
+    // It is worth noting that using explicit vectors may result in slower software if you do not make the right decisions 
+    // - the compiler’s auto-vectorisation is fairly smart as-is.
+
+    // Imports
+
+    // @import takes in a file and gives you a struct type based on that file.
+    // All declarations labeled as 'pub' will end up in this struct.
+    // @import("std") is a special case, other imports will take a file path or a package name (more details later).
+}
+
+fn dump(args: anytype) void {
+    log("dumping: {} {} {s}\n", .{args.a, args.b, args.s});
 }
 
 var numbers_left2: u32 = undefined;
