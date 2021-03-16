@@ -8,7 +8,6 @@
 //! Run the tests with:
 //! zig test hello.zig
 
-
 // M1 install: ➜ brew install zig --HEAD
 
 // Top-level declarations are order-independent. Notice the std declaration after it's used.
@@ -154,7 +153,6 @@ pub fn main() !void {
 
     // TODO: https://ziglang.org/documentation/master/#toc-String-Literals-and-Unicode-Code-Point-Literals
 
-
     // Compile time expressions
     comptime {
         var t = 0;
@@ -179,7 +177,7 @@ pub fn main() !void {
 
     // note: expressions in global scope are implicitly comptime expressions. We can even use functions to initialize complex data there.
 
-    log("comptime fibonacci stuff: {} {}\n", .{a, c});
+    log("comptime fibonacci stuff: {} {}\n", .{ a, c });
 
     log("runtime fibonacci stuff: {}\n", .{fibonacci(7)});
 
@@ -198,12 +196,12 @@ pub fn main() !void {
 
     // Arrays
 
-    const arr_a = [2]u8 {'h', 'i'};
-    const arr_b = [_]u8 {'h', 'i'};
+    const arr_a = [2]u8{ 'h', 'i' };
+    const arr_b = [_]u8{ 'h', 'i' };
 
     log("arr_a as a string: {s}\n", .{arr_a});
     log("arr_a.len: {}\n", .{arr_a.len});
-    log("arr_a: {} {}\n", .{arr_a[0], arr_a[1]});
+    log("arr_a: {} {}\n", .{ arr_a[0], arr_a[1] });
 
     // If statements
     // No truthy or falsy values, only bool values are supported
@@ -239,10 +237,9 @@ pub fn main() !void {
     log("boom: {}\n", .{blowing_up});
 
     var fizz_out: u8 = 3;
-    while(fizz_out > 0) : (fizz_out -= 1) {
+    while (fizz_out > 0) : (fizz_out -= 1) {
         log("going out: {}\n", .{fizz_out});
     }
-
 
     var vanishing: u8 = 2;
     while (vanishing < 101) {
@@ -260,10 +257,10 @@ pub fn main() !void {
 
     // For loops
 
-    const color_ids = [_]u8 {'a', 'b', 'c'};
+    const color_ids = [_]u8{ 'a', 'b', 'c' };
 
     for (color_ids) |character, index| {
-        log("1: color_ids: char: {} idx: {}\n", .{character, index});
+        log("1: color_ids: char: {} idx: {}\n", .{ character, index });
     }
 
     for (color_ids) |character| {
@@ -277,7 +274,6 @@ pub fn main() !void {
     for (color_ids) |_| {
         log("4: hey\n", .{});
     }
-
 
     // Defer will execute a statement while exiting the current block
     // Multiple defers will be executed in reverse order
@@ -303,14 +299,14 @@ pub fn main() !void {
 
     // Error set is like an enum. There are no exceptions, errors are values.
 
-    const FileOpenError = error {
+    const FileOpenError = error{
         AccessDenied,
         OutOfMemory,
         FileNotFound,
     };
 
     // Error sets coerce to their super sets.
-    const AllocationError = error {
+    const AllocationError = error{
         OutOfMemory,
     };
     const another_err: FileOpenError = AllocationError.OutOfMemory;
@@ -333,15 +329,15 @@ pub fn main() !void {
 
     // Errdefer works like defer but only executes when the function is returned from with an error (within the errdefer block).
     var bn_example = errDeferExample() catch 20;
-    log("bn_example: {} some_problem: {}\n", .{bn_example, some_problem});
+    log("bn_example: {} some_problem: {}\n", .{ bn_example, some_problem });
 
     // Error unions return from a function can have their error sets inferred so it's possible to omit it in the return type.
     const this_failed: error{AccessDenied}!void = createFile();
 
     // Error sets can be merged
 
-    const SetOfErrorsA = error { NotDir, PathNotFound };
-    const SetOfErrorsB = error { OutOfMemory, PathNotFound};
+    const SetOfErrorsA = error{ NotDir, PathNotFound };
+    const SetOfErrorsB = error{ OutOfMemory, PathNotFound };
     const SetOfErrorsC = SetOfErrorsA || SetOfErrorsB;
 
     // There's anyerror which is the global error set (a superset of all error sets). It's usage should be generally avoided.
@@ -349,7 +345,7 @@ pub fn main() !void {
     // Switch statements. Must be exaustive, there's no fall through, all branches must coerce to the same type. Can be used as an expression.
 
     var potato: i8 = 10;
-    switch(potato) {
+    switch (potato) {
         -1...1 => {
             potato = -potato;
         },
@@ -386,7 +382,7 @@ pub fn main() !void {
     // const ya: u32 = if (x == 10) else unreachable // Will throw error during runtime
 
     const a_upper = asciiToUpper('a');
-    const a_upper_str = [_]u8 {a_upper};
+    const a_upper_str = [_]u8{a_upper};
     log("Upper a: {s}\n", .{a_upper_str});
 
     // Pointers
@@ -414,33 +410,27 @@ pub fn main() !void {
     // Slices
     // Slices are like a pair [*]T (pointer to data) and usize (element count)
 
-    const pa = [_]u8 { 65, 66, 67, 68, 69, 70 };
+    const pa = [_]u8{ 65, 66, 67, 68, 69, 70 };
     const pa_slice = pa[0..3]; // Slice pa[n..m] -> elements from n to (m - 1)
     log("pa_slice sum: {}\n", .{total_slice(pa_slice)});
 
     // When n and m are both known at compile time, slicing will produce a pointer to an array (*[N]T will coerce to a []T)
-    log("pa_slice has expected type *const [3]u8: {s} :: {s}\n", .{@TypeOf(pa_slice), @TypeOf(pa_slice) == *const [3]u8});
+    log("pa_slice has expected type *const [3]u8: {s} :: {s}\n", .{ @TypeOf(pa_slice), @TypeOf(pa_slice) == *const [3]u8 });
 
     var pa_sliced_to_the_end = pa[0..];
-    log("pa sliced to the end: {s} -> {s}\n", .{pa, pa_sliced_to_the_end});
-
+    log("pa sliced to the end: {s} -> {s}\n", .{ pa, pa_sliced_to_the_end });
 
     // Enums
 
-    const Direction = enum {north, south, east, west };
-    const Value = enum(u2) {zero, one, two}; // They can have specified integer tag types
-    log("Value: 0 -> {} :: 1 -> {} :: 2 -> {} \n", .{@enumToInt(Value.zero), @enumToInt(Value.one), @enumToInt(Value.two)});
+    const Direction = enum { north, south, east, west };
+    const Value = enum(u2) { zero, one, two }; // They can have specified integer tag types
+    log("Value: 0 -> {} :: 1 -> {} :: 2 -> {} \n", .{ @enumToInt(Value.zero), @enumToInt(Value.one), @enumToInt(Value.two) });
 
     // Values can be overridden, the next values continue from there
-    
-    const Value2 = enum(u32) {
-        hundred = 100,
-        thousand = 1000,
-        million = 1000000,
-        next
-    };
 
-    log("Value: million -> {} :: next (1000001) -> {}\n", .{@enumToInt(Value2.million), @enumToInt(Value2.next)});
+    const Value2 = enum(u32) { hundred = 100, thousand = 1000, million = 1000000, next };
+
+    log("Value: million -> {} :: next (1000001) -> {}\n", .{ @enumToInt(Value2.million), @enumToInt(Value2.next) });
 
     // Methods can be given to enums (note: apparently only when global scoped)
     log("isClubs: {}\n", .{Suit.spades.isClubs()});
@@ -449,11 +439,9 @@ pub fn main() !void {
 
     // Structs
 
-    const Vec3 = struct {
-        x: f32, y: f32, z: f32
-    };
+    const Vec3 = struct { x: f32, y: f32, z: f32 };
 
-    const my_vector = Vec3 {
+    const my_vector = Vec3{
         .x = 0,
         .y = 100,
         .z = 50,
@@ -463,11 +451,9 @@ pub fn main() !void {
 
     // Fields can be given defaults
 
-    const Vec4 = struct {
-        x: f32, y: f32, z: f32 = 0, w: f32 = undefined
-    };
+    const Vec4 = struct { x: f32, y: f32, z: f32 = 0, w: f32 = undefined };
 
-    const my_vec4 = Vec4 {
+    const my_vec4 = Vec4{
         .x = 25,
         .y = 40,
         .w = 100,
@@ -478,7 +464,7 @@ pub fn main() !void {
     // For structs one level of dereferencing is done when accessing fields.
     // Notice the calls to self.x and y in the swap function.
 
-    var my_stuff = Stuff {
+    var my_stuff = Stuff{
         .x = 100,
         .y = 200,
     };
@@ -496,16 +482,16 @@ pub fn main() !void {
         bool: bool,
     };
 
-    var payload = Payload {.int = 1234};
+    var payload = Payload{ .int = 1234 };
     // playload.float = 12.34; // cannot do this
 
     // Tagged unions
     // Unions that use an enum to detect which field is active.
 
     const Tag = enum { a, b, c };
-    const Tagged = union(Tag) {a: u8, b: f32, c: bool};
+    const Tagged = union(Tag) { a: u8, b: f32, c: bool };
 
-    var my_value = Tagged {.b = 1.5};
+    var my_value = Tagged{ .b = 1.5 };
     switch (my_value) {
         .a => |*byte| byte.* += 1,
         .b => |*float| float.* *= 2,
@@ -515,21 +501,21 @@ pub fn main() !void {
     log("my_value.b will be 3: {}\n", .{my_value.b});
 
     // The tag type of a tagged union can also be inferred:
-    const TaggedInferred = union(enum) {a: u8, b: f32, c: bool};
-    var my_value_inf = Tagged {.c = true};
+    const TaggedInferred = union(enum) { a: u8, b: f32, c: bool };
+    var my_value_inf = Tagged{ .c = true };
     log("my_value_inf.c: {}\n", .{my_value_inf.c});
 
     // void member types can have their type omitted from the syntax. Here none and stuff are of type void:
     // (?) note: not entirely sure what's the point of this.
-    const Tagged2 = union(enum) {a: u8, b: f32, none, stuff};
-    
+    const Tagged2 = union(enum) { a: u8, b: f32, none, stuff };
+
     // Integer rules
 
     const decimal_int: i32 = 98222;
     const hex_int: u8 = 0xff;
     const octal_int: u16 = 0o755;
     const binary_int: u8 = 0b11110000;
-    
+
     // Underscores may be placed as a visual separator.
 
     const permissions: u64 = 0o7_5_5;
@@ -538,17 +524,17 @@ pub fn main() !void {
     // Integer widening is allowed:
     const aa: u8 = 250;
     const bb: u16 = aa;
-    log("same value: {} == {} = {}\n", .{aa,bb, aa == bb});
+    log("same value: {} == {} = {}\n", .{ aa, bb, aa == bb });
 
     // If you have a value that cannot be coerced into the type, @intCast can be used to convert. If the value is out of range it's a detectable illegal behaviour.
     const xx: u64 = 200;
     const yy = @intCast(u8, xx);
-    log("coerced: {} into {}\n", .{xx, yy});
+    log("coerced: {} into {}\n", .{ xx, yy });
 
     // Integers by default are not allowed to overflow. This is detectable illegal behaviour.
     // For uses cases where overflow is expected the language provides overflow operators.
     var pp: u8 = 255;
-    pp +%=1;
+    pp +%= 1;
     log("overflowed to 0: {}\n", .{pp});
 
     // Floats
@@ -574,7 +560,7 @@ pub fn main() !void {
 
     const qa: i32 = 0;
     const qf = @intToFloat(f32, qa);
-    log("same value: {} == {} = {}\n", .{qa, qf, qa == qf});
+    log("same value: {} == {} = {}\n", .{ qa, qf, qa == qf });
 
     // Labelled blocks.
     // Blocks are expressions and can be given labels, which can be used to yield values.
@@ -592,8 +578,8 @@ pub fn main() !void {
     // Loops can be given labels, allowing you to break and continue to outer loops.
 
     var q_count: usize = 0;
-    outer: for ([_]i32 {1,2,3,4}) |_| {
-        for ([_]i32 {1,2,3,4}) |_| {
+    outer: for ([_]i32{ 1, 2, 3, 4 }) |_| {
+        for ([_]i32{ 1, 2, 3, 4 }) |_| {
             q_count += 1;
             continue :outer;
         }
@@ -610,7 +596,7 @@ pub fn main() !void {
     // Use the syntax *T and are used to store data, null or a value of type T.
 
     var found_index: ?usize = null;
-    const ee = [_]i32 {1, 2, 3, 4};
+    const ee = [_]i32{ 1, 2, 3, 4 };
     found_index = findIndexOf(ee, 5);
     log("found_index: {}\n", .{found_index});
     log("found_index: {}\n", .{findIndexOf(ee, 1)});
@@ -618,14 +604,14 @@ pub fn main() !void {
     // orelse is supported by options. It can be used when the optional is null, it unwraps it and provides a fallback value
     var t4: ?f32 = null;
     var t5 = t4 orelse 0;
-    log("t6 should be zero: {} :: type: {}\n", .{t5 == 0, @TypeOf(t5) == f32});
+    log("t6 should be zero: {} :: type: {}\n", .{ t5 == 0, @TypeOf(t5) == f32 });
 
     // When you know it's impossible for an optional value to be null you can use .? as a shorthand for orelse unreachable. Using this unwrapped value when it's null is detectable illegal behaviour.
 
     const t6: ?f32 = 5;
     const t7 = t6 orelse unreachable;
     const t8 = t6.?;
-    log("t7 is equivalent to t8 -> {} == {}\n", .{t7, t8});
+    log("t7 is equivalent to t8 -> {} == {}\n", .{ t7, t8 });
 
     // If optional payload capture:
 
@@ -641,7 +627,7 @@ pub fn main() !void {
 
     // You can also use it in a while:
     var sum: u32 = 0;
-    while(eventuallyNullSequence()) |value| {
+    while (eventuallyNullSequence()) |value| {
         sum += value;
     }
     log("sum: {}\n", .{sum});
@@ -655,11 +641,11 @@ pub fn main() !void {
     var x3 = comptime blk: {
         break :blk fibonacci(10);
     };
-    log("x1: {} x2: {} x3: {}\n", .{x1, x2, x3});
+    log("x1: {} x2: {} x3: {}\n", .{ x1, x2, x3 });
 
     // Function parameters can also be tagged as comptime.
     // note: PascalCase functions return a type (this is why TypeOf starts with upper case)
-    log("Comparing two types: {} == {} = {}\n", .{Matrix(f32, 4, 4), [4][4]f32, (Matrix(f32, 4, 4) == [4][4]f32)});
+    log("Comparing two types: {} == {} = {}\n", .{ Matrix(f32, 4, 4), [4][4]f32, (Matrix(f32, 4, 4) == [4][4]f32) });
 
     // You can reflect upon types using the built-in @typeInfo
     const si = addSmallInts(u16, 20, 30);
@@ -668,27 +654,27 @@ pub fn main() !void {
     // note: .{} is the anonymous struct syntax.
 
     // @Type function creates a type from a @typeInfo
-    log("a bigger int: {} {}\n", .{u8, GetABiggerInt(u8)});
+    log("a bigger int: {} {}\n", .{ u8, GetABiggerInt(u8) });
 
     // Returning a struct type is how you make generic data structures.
 
-    const v1 = Vec(3, f32).init([_] f32 {10, -10, 5});
+    const v1 = Vec(3, f32).init([_]f32{ 10, -10, 5 });
     const v2 = v1.abs();
 
-    log("using std.mem.eql to compare two slices: {} {} -> {}\n", .{v1, v2, eql(f32, &v2.data, &[_]f32 {10, 10, 5})});
+    log("using std.mem.eql to compare two slices: {} {} -> {}\n", .{ v1, v2, eql(f32, &v2.data, &[_]f32{ 10, 10, 5 }) });
 
     // The types of function parameters cal also be inferred by using anytype in place of a type. @TypeOf can then be used on the parameter
     const t9 = 10;
-    log("{} {}\n", .{plusOne(t9), @as(u32, 1)});
+    log("{} {}\n", .{ plusOne(t9), @as(u32, 1) });
 
     // Comptime also has operators ++ and ** for concatenating and repeating arrays and slices. These operators only work at comptime.
 
-    const t10 = [4]u8 {70, 71, 72, 73};
+    const t10 = [4]u8{ 70, 71, 72, 73 };
     const t11 = t10[0..];
 
     const joined = t10 ++ t11;
     const repeated = t10 ** 4;
-    log("joined: {s} repeated: {s}\n", .{joined, repeated});
+    log("joined: {s} repeated: {s}\n", .{ joined, repeated });
 
     // Payload captures
     // Used to capture the value or something, for example in if statements and optionals
@@ -709,19 +695,18 @@ pub fn main() !void {
         log("error! {}\n", .{err});
     }
     log("summing! {}\n", .{summing});
-    
 
     // Pointer capture.
     // It's also possible to modify captured values by taking the as pointers using the |*value| syntax.
-    const abc = [_]u8 {'a', 'b', 'c'};
-    var my_data = [_]u8 {'a', 'b', 'c'};
+    const abc = [_]u8{ 'a', 'b', 'c' };
+    var my_data = [_]u8{ 'a', 'b', 'c' };
     for (my_data) |*byte| byte.* += 1;
-    log("Pointer capture: {s} -> {s}\n", .{abc, my_data});
+    log("Pointer capture: {s} -> {s}\n", .{ abc, my_data });
 
     // Inline loops.
     // There's the option to unroll loops at compile time. Using this for performance reasons is inadvisable unless you've tested it. The compiler tends to make better decisions here than you.
     var t_sum: usize = 0;
-    const t_types = [_]type {i32, f32, u8, bool };
+    const t_types = [_]type{ i32, f32, u8, bool };
     inline for (t_types) |T| t_sum += @sizeOf(T);
     log("Type sum: {}\n", .{t_sum});
 
@@ -740,14 +725,14 @@ pub fn main() !void {
     // }
 
     // Anonymous struct literal
-    const P1 = struct {x: i32, y: i32};
+    const P1 = struct { x: i32, y: i32 };
 
     var pt: P1 = .{
         .x = 13,
         .y = 67,
     };
 
-    log("p1: {} {}\n", .{pt.x, pt.y});
+    log("p1: {} {}\n", .{ pt.x, pt.y });
 
     // Anonymous structs can be completely anonymous (without being coerced into another struct type)
 
@@ -762,37 +747,36 @@ pub fn main() !void {
     // Internally they have numbered field names starting at 0. May be accessed with the special syntax: @"0".
     // Things inside @"" are recognized as identifiers.
 
-    const my_tuple = .{ 
-            @as(i32, 1234),
-            @as(f64, 12.32),
-            true,
-            "hi"
-        } ++ .{false} ** 2;
+    const my_tuple = .{
+        @as(i32, 1234),
+        @as(f64, 12.32),
+        true,
+        "hi",
+    } ++ .{false} ** 2;
 
     inline for (my_tuple) |v, i| {
         const my_type = @TypeOf(v);
         if (my_type == i32 or my_type == f64) {
-            std.debug.print("|{}| -> |{}| \n", .{i, v});
+            std.debug.print("|{}| -> |{}| \n", .{ i, v });
         } else {
-            std.debug.print("|{}| -> |{s}|\n", .{i, v});    
+            std.debug.print("|{}| -> |{s}|\n", .{ i, v });
         }
-
     }
 
     log("my_tuple: len={}\n", .{my_tuple.len});
-    log("my_tuple: @\"{}\" = {}\n", .{0, my_tuple.@"0"});
+    log("my_tuple: @\"{}\" = {}\n", .{ 0, my_tuple.@"0" });
     const at = my_tuple.@"3"[0];
-    const af = [_]u8 {at};
-    log("my_tuple: @\"{}\" = {} {s}\n", .{3, at, af});
+    const af = [_]u8{at};
+    log("my_tuple: @\"{}\" = {} {s}\n", .{ 3, at, af });
 
     // Sentinel termination
     // Arrays, slices and many pointers may be terminated by a value of their child type
 
-    const terminated_with_0_byte = [3:0]u8 {73, 72, 71};
-    log("terminated_with_0_byte   len will be 3:  |{s}| --> {}\n", .{terminated_with_0_byte, terminated_with_0_byte.len});
+    const terminated_with_0_byte = [3:0]u8{ 73, 72, 71 };
+    log("terminated_with_0_byte   len will be 3:  |{s}| --> {}\n", .{ terminated_with_0_byte, terminated_with_0_byte.len });
 
-    const terminated_with_80_byte = [3:80]u8 {73, 72, 71};
-    log("terminated_with_80_byte  len will be 3:  |{s}| --> {}\n", .{terminated_with_80_byte, terminated_with_80_byte.len});
+    const terminated_with_80_byte = [3:80]u8{ 73, 72, 71 };
+    log("terminated_with_80_byte  len will be 3:  |{s}| --> {}\n", .{ terminated_with_80_byte, terminated_with_80_byte.len });
 
     // Using @bitCast to do an unsafe bitwise type conversion just to prove that the actual last element of the array has the sentinel byte.
     const k1 = @bitCast([4]u8, terminated_with_0_byte);
@@ -815,22 +799,22 @@ pub fn main() !void {
     const k6: [4]u8 = k5;
 
     // Sentinel terminated slicing is supported:
-    const k7 = [_:0]u8 { 255 } ** 4;
-    const k8 = k7[0..4: 0];
+    const k7 = [_:0]u8{255} ** 4;
+    const k8 = k7[0..4 :0];
     const k9 = k7[0..2];
-    
+
     // Vectors
     // Vector types for SIMD. Check Arraylist for "resizable storage"
     // Can only have boolean, integers, floats and pointers as child types.
     // Operations are performed on each of the values in the vector.
 
-    const vx: std.meta.Vector(4, f32) = .{1, -10, 20, -1};
-    const vy: std.meta.Vector(4, f32) = .{2, 10, 0, 1};
+    const vx: std.meta.Vector(4, f32) = .{ 1, -10, 20, -1 };
+    const vy: std.meta.Vector(4, f32) = .{ 2, 10, 0, 1 };
 
     const vz = vx + vy;
 
     // Using std.meta.eql to check equality:
-    const v_result = std.meta.eql(vz, std.meta.Vector(4, f32) {3, 0, 20, 0});
+    const v_result = std.meta.eql(vz, std.meta.Vector(4, f32){ 3, 0, 20, 0 });
     log("vectors: expected result -> {}\n", .{v_result});
 
     // They are indexable:
@@ -851,7 +835,7 @@ pub fn main() !void {
     const v_arr: [4]f32 = vt;
 
     // Note from ziglearn.org:
-    // It is worth noting that using explicit vectors may result in slower software if you do not make the right decisions 
+    // It is worth noting that using explicit vectors may result in slower software if you do not make the right decisions
     // - the compiler’s auto-vectorisation is fairly smart as-is.
 
     // Imports
@@ -862,7 +846,7 @@ pub fn main() !void {
 }
 
 fn dump(args: anytype) void {
-    log("dumping: {} {} {s}\n", .{args.a, args.b, args.s});
+    log("dumping: {} {} {s}\n", .{ args.a, args.b, args.s });
 }
 
 var numbers_left2: u32 = undefined;
@@ -884,7 +868,7 @@ fn Vec(comptime count: comptime_int, comptime T: type) type {
         const Self = @This(); // Gets the type of the innermost struct, union or enum.
 
         fn abs(self: Self) Self {
-            var tmp = Self { .data = undefined };
+            var tmp = Self{ .data = undefined };
 
             for (self.data) |elem, i| {
                 tmp.data[i] = if (elem < 0) -elem else elem;
@@ -894,32 +878,30 @@ fn Vec(comptime count: comptime_int, comptime T: type) type {
         }
 
         fn init(data: [count]T) Self {
-            return Self {.data = data };
+            return Self{ .data = data };
         }
     };
 }
 
 fn GetABiggerInt(comptime T: type) type {
     // @Type function creates a type from a @typeInfo
-    return @Type(
-        .{
-            .Int = .{
-                .bits = @typeInfo(T).Int.bits + 1,
-                .signedness = @typeInfo(T).Int.signedness,
-            },
-        }
-    );
+    return @Type(.{
+        .Int = .{
+            .bits = @typeInfo(T).Int.bits + 1,
+            .signedness = @typeInfo(T).Int.signedness,
+        },
+    });
 }
 
 fn addSmallInts(comptime T: type, a: T, b: T) T {
-    return switch(@typeInfo(T)) {
+    return switch (@typeInfo(T)) {
         .ComptimeInt => a + b,
         .Int => |info| if (info.bits <= 16) a + b else @compileError("ints are too large"),
         else => @compileError("only ints are accepted"),
     };
 }
 
-fn Matrix (comptime T: type, comptime width: comptime_int, comptime height: comptime_int) type {
+fn Matrix(comptime T: type, comptime width: comptime_int, comptime height: comptime_int) type {
     return [height][width]T;
 }
 
@@ -931,7 +913,7 @@ fn eventuallyNullSequence() ?u32 {
 }
 
 fn findIndexOf(arr: [4]i32, number: i32) ?usize {
-    for(arr) |v, i| {
+    for (arr) |v, i| {
         if (v == number) return 1;
     }
     return null;
@@ -939,7 +921,7 @@ fn findIndexOf(arr: [4]i32, number: i32) ?usize {
 
 fn rangeHasNumber(begin: usize, end: usize, number: usize) bool {
     var i = begin;
-    return while(i < end) : (i += 1) {
+    return while (i < end) : (i += 1) {
         if (i == number) break true;
     } else false;
 }
@@ -969,18 +951,18 @@ const Suit = enum {
 
 fn total_slice(values: []const u8) usize {
     var count: usize = 0;
-    for (values) |v|  count += v;
+    for (values) |v| count += v;
     return count;
 }
 
-fn increment (num: *u8) void {
+fn increment(num: *u8) void {
     num.* += 1;
 }
 
 fn asciiToUpper(x: u8) u8 {
-    return switch(x) {
-        'a' ... 'z' => x + 'A' - 'a',
-        'A' ... 'Z' => x,
+    return switch (x) {
+        'a'...'z' => x + 'A' - 'a',
+        'A'...'Z' => x,
         else => unreachable,
     };
 }
@@ -1041,7 +1023,6 @@ const Node = struct {
     name: []u8,
 };
 
-
 test "comments" {
     const x = true; // This is a comment!
     expect(x);
@@ -1070,7 +1051,6 @@ fn add(a: i32, b: i32) i32 {
     return a + b;
 }
 
-
 test "Global variables can be declared inside struct, union or enum" {
     expect(foo() == 1235);
     expect(foo() == 1236);
@@ -1092,34 +1072,33 @@ fn foo() i32 {
     return S.a;
 }
 
-// threadlocal variables currently don't work on Mac M1: https://github.com/ziglang/zig/issues/8216 
-// 
+// threadlocal variables currently don't work on Mac M1: https://github.com/ziglang/zig/issues/8216
+//
 // threadlocal var q: i32 = 100;
-// 
+//
 // test "thread local storage" {
 //     const t1 = try std.Thread.spawn(testThreadLocalStorage, {});
 //     const t2 = try std.Thread.spawn(testThreadLocalStorage, {});
-// 
+//
 //     testThreadLocalStorage({});
-// 
+//
 //     t1.wait();
 //     t2.wait();
 // }
-// 
+//
 // fn testThreadLocalStorage(context: void) void {
 //     assert(q == 100);
 //     q += 1;
 //     assert(q == 101);
 // }
 
-
 // I would expect that x in S.x would be scoped differently but apparently the declaring var x inside would shadow the existing x. inside S, x would be x and it already exists (? - wonky explanation here)
 // const S = struct {
 //     var x: i32 = 11111;
 // };
-// 
+//
 // var x: i32 = 9999;
-// 
+//
 // pub fn main() !void {
 //     S.x = 1;
 //     x = 9;
@@ -1139,4 +1118,3 @@ test "comptime vars" {
         @compileError("wrong y value");
     }
 }
-
