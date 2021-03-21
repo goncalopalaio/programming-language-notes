@@ -24,6 +24,7 @@ pub fn main() !void {
     // try reading_user_input(allocator);
     try implementing_a_writer(allocator);
     try string_formatting(allocator);
+    try formatting_specifiers();
     try custom_formatting(allocator);
     try parsing_json(allocator);
     try random_numbers();
@@ -31,7 +32,127 @@ pub fn main() !void {
     try hashmaps(allocator);
     try stacks(allocator);
     try sorting();
-    // TODO Iterators
+    try iterators(allocator);
+}
+
+fn formatting_specifiers() !void {
+    debug("running iterators\n", .{});
+
+    var b: [8]u8 = undefined;
+
+    // Formats a byte into an ascii character:
+    _ = try std.fmt.bufPrint(&b, "{c} {c} {c} {c} ", .{65, 66, 67, 68});
+    debug("\tformatted: {s}\n", .{b});
+
+    // Previously {B} and {Bi} existed to output memory sizes in metric (1000) and power-of-two (1024) based notation.
+    // but are now deprecated, so we're using fmtIntSizeDec.
+    debug("\tformatted: {s}\n", .{std.fmt.fmtIntSizeDec(1024)});
+
+    // {b} and {o} to output integers in binary and octal format.
+    _ = try std.fmt.bufPrint(&b, "{b}", .{254});
+    debug("\tformatted: {s}\n", .{b});
+
+    // {*} performs pointer formatting, printing the address rather than the value.
+    var b2: [16]u8 = undefined;
+    const result = try std.fmt.bufPrint(&b2, "{*}", .{@intToPtr(*u8, 0xDEADBEEF)});
+    debug("\tformatted: buf: {s} result: {s} {s} -- {*} {*}\n", .{b2, result, @TypeOf(result), &b2, &result});
+
+    // {e} for scientific notation
+    // {s} for strings.
+
+    // Advanced formatting:
+    // {[position][specifier]:[fill][alignment][width].[precision]}
+
+    // Position:
+    debug("\tadvanced formatting - position: {1s} {0s} {0s} {0s}\n", .{"a", "b"});
+
+    debug("\tadvanced formatting - fill, aligned left  : |{s: <5}|\n", .{"hi!"});
+    debug("\tadvanced formatting - fill, aligned right : |{s: >5}|\n", .{"hi!"});
+    debug("\tadvanced formatting - fill, aligned center: |{s:_^5}|\n", .{"hi!"});
+
+    debug("\tadvanced formatting - precision: |{d:.2}|\n", .{3.14159});
+
+}
+
+const ContainsIterator = struct {
+    strings: []const []const u8,
+    needle: []const u8,
+    index: usize = 0,
+
+    fn next(self: *ContainsIterator) ?[]const u8 {
+        const index = self.index;
+
+        for (self.strings[index..]) |string| {
+            self.index += 1;
+
+            // std.mem.indexOf returns ?usize
+            if (std.mem.indexOf(u8, string, self.needle)) |_| {
+                return string;
+            }
+        }
+
+        return null;
+    }
+};
+
+fn iterators(allocator: *std.mem.Allocator) !void {
+    debug("running iterators\n", .{});
+
+    // It's a common idiom to have a struct type with a next function with an optional in its return type so that the function
+    // may return a null to indicate that the iteration is finished.
+
+    const text = "robust, optimal, reusable, maintainable, ";
+
+    var iter = std.mem.split(text, ", ");
+
+    std.debug.assert(std.mem.eql(u8, iter.next().?, "robust"));
+    std.debug.assert(std.mem.eql(u8, iter.next().?, "optimal"));
+    std.debug.assert(std.mem.eql(u8, iter.next().?, "reusable"));
+    std.debug.assert(std.mem.eql(u8, iter.next().?, "maintainable"));
+    std.debug.assert(std.mem.eql(u8, iter.next().?, ""));
+    std.debug.assert(iter.next() == null);
+
+    // Some iterators have a !?T return type as opposed to ?T. It requires that the error is unpacked before the optional
+    // meaning that the work done to get the next iteration may error.
+
+    var fiter = (try std.fs.cwd().openDir(".", .{ .iterate = true })).iterate();
+
+    var file_count: usize = 0;
+    while (try fiter.next()) |entry| {
+        if (entry.kind == .File) file_count += 1;
+    }
+
+    std.debug.assert(file_count > 0);
+
+    // ?!T return types are also found, meaning the optional is unpacked before the error union.
+    // This conveys that getting to the next iteration is not the part that can fail,
+    // but rather getting the value of the next iteration may fail
+
+    var arg_chars: usize = 0;
+    var piter = std.process.args();
+
+    while (piter.next(allocator)) |arg| {
+        const argument = arg catch break;
+        arg_chars += argument.len;
+        debug("\targument: {s}\n", .{argument});
+        allocator.free(argument);
+    }
+
+    std.debug.assert(arg_chars > 0);
+
+    // Implementing a custom iterator.
+    // This particular implementation will iterate over a slice of strings, yielding the strings which contain a given string.
+
+    var string_arr = [_][]const u8{ "one", "two", "three" };
+
+    var citer = ContainsIterator{
+        .strings = &string_arr,
+        .needle = "e",
+    };
+
+    while (citer.next()) |elem| {
+        debug("\telem: {s}\n", .{elem});
+    }
 }
 
 fn debug_array(arr: anytype) void {
@@ -44,15 +165,14 @@ fn debug_array(arr: anytype) void {
 fn sorting() !void {
     debug("running sorting\n", .{});
 
-    var data = [_]u8 {10, 240, 0, 0, 10, 5};
+    var data = [_]u8{ 10, 240, 0, 0, 10, 5 };
     debug_array(data);
-    
+
     std.sort.sort(u8, &data, {}, comptime std.sort.asc(u8));
     debug_array(data);
 
     std.sort.sort(u8, &data, {}, comptime std.sort.desc(u8));
     debug_array(data);
-    
 }
 
 fn stacks(allocator: *std.mem.Allocator) !void {
@@ -69,15 +189,15 @@ fn stacks(allocator: *std.mem.Allocator) !void {
 
     for (parens) |char, i| {
         if (char == '(') try stack.append(i);
-        if (char == ')') try pairs.append(.{.open = stack.pop(), .close = i});
+        if (char == ')') try pairs.append(.{ .open = stack.pop(), .close = i });
     }
 
     for (pairs.items) |pair, idx| {
-        var expected_pair = switch(idx) {
-            0 => Pair {.open = 1, .close = 2},
-            1 => Pair {.open = 3, .close = 4},
-            2 => Pair {.open = 0, .close = 5},
-            else => unreachable
+        var expected_pair = switch (idx) {
+            0 => Pair{ .open = 1, .close = 2 },
+            1 => Pair{ .open = 3, .close = 4 },
+            2 => Pair{ .open = 0, .close = 5 },
+            else => unreachable,
         };
 
         // Using std.meta.eql to compare all fields in the struct.
@@ -93,20 +213,20 @@ fn hashmaps(allocator: *std.mem.Allocator) !void {
     var map = std.AutoHashMap(u32, Point).init(allocator);
     defer map.deinit();
 
-    try map.put(1234, .{.x = 1, .y = 4});
-    try map.put(9921, .{.x = 1, .y = 4});
+    try map.put(1234, .{ .x = 1, .y = 4 });
+    try map.put(9921, .{ .x = 1, .y = 4 });
 
     std.debug.assert(map.count() == 2);
 
-    var sum = Point {.x = 0, .y = 0};
+    var sum = Point{ .x = 0, .y = 0 };
     var iterator = map.iterator();
 
-    while(iterator.next()) |entry| {
+    while (iterator.next()) |entry| {
         sum.x += entry.value.x;
         sum.y += entry.value.y;
     }
 
-    debug("\tsum: {} {}\n", .{sum.x, sum.y});
+    debug("\tsum: {} {}\n", .{ sum.x, sum.y });
 
     // fetchPut() puts a value in the hashmap returning a value if there was a previous value for the key.
     var imap = std.AutoHashMap(u8, f32).init(allocator);
@@ -120,7 +240,7 @@ fn hashmaps(allocator: *std.mem.Allocator) !void {
 
     // Use std.StringHashMap when you need strings as keys.
 
-    var smap = std.StringHashMap(enum {cool, uncool}).init(allocator);
+    var smap = std.StringHashMap(enum { cool, uncool }).init(allocator);
     defer smap.deinit();
 
     try smap.put("loris", .uncool);
@@ -137,7 +257,6 @@ fn hashmaps(allocator: *std.mem.Allocator) !void {
     try amap.put(123, 211);
 }
 fn threads() !void {
-
     debug("running threads\n", .{});
 
     var thread = try std.Thread.spawn(ticker, @as(u8, 1));
@@ -150,7 +269,7 @@ fn threads() !void {
 var tick: isize = 0;
 
 fn ticker(step: u8) void {
-    while(tick <= 4) {
+    while (tick <= 4) {
         debug("\ttick\n", .{});
         std.time.sleep(std.time.ns_per_s / 32);
         tick += @as(isize, step);
