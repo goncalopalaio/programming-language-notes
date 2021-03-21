@@ -26,18 +26,179 @@ pub fn main() !void {
     try string_formatting(allocator);
     try custom_formatting(allocator);
     try parsing_json(allocator);
+    try random_numbers();
+    try threads();
+    try hashmaps(allocator);
+    try stacks(allocator);
+    try sorting();
+    // TODO Iterators
+}
+
+fn debug_array(arr: anytype) void {
+    for (arr) |a| {
+        debug("\t{}", .{a});
+    }
+    debug("\n", .{});
+}
+
+fn sorting() !void {
+    debug("running sorting\n", .{});
+
+    var data = [_]u8 {10, 240, 0, 0, 10, 5};
+    debug_array(data);
+    
+    std.sort.sort(u8, &data, {}, comptime std.sort.asc(u8));
+    debug_array(data);
+
+    std.sort.sort(u8, &data, {}, comptime std.sort.desc(u8));
+    debug_array(data);
+    
+}
+
+fn stacks(allocator: *std.mem.Allocator) !void {
+    debug("running stacks\n", .{});
+
+    const parens = "(()())";
+
+    var stack = std.ArrayList(usize).init(allocator);
+    defer stack.deinit();
+
+    const Pair = struct { open: usize, close: usize };
+    var pairs = std.ArrayList(Pair).init(allocator);
+    defer pairs.deinit();
+
+    for (parens) |char, i| {
+        if (char == '(') try stack.append(i);
+        if (char == ')') try pairs.append(.{.open = stack.pop(), .close = i});
+    }
+
+    for (pairs.items) |pair, idx| {
+        var expected_pair = switch(idx) {
+            0 => Pair {.open = 1, .close = 2},
+            1 => Pair {.open = 3, .close = 4},
+            2 => Pair {.open = 0, .close = 5},
+            else => unreachable
+        };
+
+        // Using std.meta.eql to compare all fields in the struct.
+        std.debug.assert(std.meta.eql(pair, expected_pair));
+    }
+}
+
+fn hashmaps(allocator: *std.mem.Allocator) !void {
+    debug("running hashmaps\n", .{});
+
+    const Point = struct { x: i32, y: i32 };
+
+    var map = std.AutoHashMap(u32, Point).init(allocator);
+    defer map.deinit();
+
+    try map.put(1234, .{.x = 1, .y = 4});
+    try map.put(9921, .{.x = 1, .y = 4});
+
+    std.debug.assert(map.count() == 2);
+
+    var sum = Point {.x = 0, .y = 0};
+    var iterator = map.iterator();
+
+    while(iterator.next()) |entry| {
+        sum.x += entry.value.x;
+        sum.y += entry.value.y;
+    }
+
+    debug("\tsum: {} {}\n", .{sum.x, sum.y});
+
+    // fetchPut() puts a value in the hashmap returning a value if there was a previous value for the key.
+    var imap = std.AutoHashMap(u8, f32).init(allocator);
+    defer imap.deinit();
+
+    try imap.put(255, 10);
+    const old = try imap.fetchPut(255, 100);
+
+    std.debug.assert(old.?.value == 10);
+    std.debug.assert(imap.get(255).? == 100);
+
+    // Use std.StringHashMap when you need strings as keys.
+
+    var smap = std.StringHashMap(enum {cool, uncool}).init(allocator);
+    defer smap.deinit();
+
+    try smap.put("loris", .uncool);
+    try smap.put("me", .cool);
+    std.debug.assert(smap.get("me").? == .cool);
+    std.debug.assert(smap.get("loris").? == .uncool);
+
+    // StringHashMap and AutoHashMap are wrappers over std.HashMap, use it for more control.
+    // To have your elements backed by an array use std.ArrayHashMap and its wrapper std.AutoArrayHashMap.
+
+    var amap = std.AutoArrayHashMap(u8, u8).init(allocator);
+    defer amap.deinit();
+
+    try amap.put(123, 211);
+}
+fn threads() !void {
+
+    debug("running threads\n", .{});
+
+    var thread = try std.Thread.spawn(ticker, @as(u8, 1));
+
+    debug("\twaiting for thread\n", .{});
+    thread.wait();
+    debug("\tthread finished\n", .{});
+}
+
+var tick: isize = 0;
+
+fn ticker(step: u8) void {
+    while(tick <= 4) {
+        debug("\ttick\n", .{});
+        std.time.sleep(std.time.ns_per_s / 32);
+        tick += @as(isize, step);
+        debug("\ttock\n", .{});
+    }
+}
+
+fn random_numbers() !void {
+    debug("running random_numbers\n", .{});
+
+    var prng = std.rand.DefaultPrng.init(blk: {
+        var seed: u64 = undefined;
+        try std.os.getrandom(std.mem.asBytes(&seed));
+        break :blk seed;
+    });
+
+    const rand = &prng.random;
+
+    const a = rand.float(f32);
+    const b = rand.boolean();
+    const c = rand.int(u8);
+    const d = rand.intRangeAtMost(u8, 0, 255);
+
+    debug("\trandom -> prng:   {} {} {} {}\n", .{ a, b, c, d });
+
+    // Crypto random numbers
+
+    const crand = std.crypto.random;
+    const ca = crand.float(f32);
+    const cb = crand.boolean();
+    const cc = crand.int(u8);
+    const cd = crand.intRangeAtMost(u8, 0, 255);
+
+    debug("\trandom -> crypto: {} {} {} {}\n", .{ ca, cb, cc, cd });
 }
 
 const Place = struct { lat: f32, lon: f32 };
 
 fn parsing_json(allocator: *std.mem.Allocator) !void {
+    debug("running parsing_json\n", .{});
+
     var stream = std.json.TokenStream.init(
         \\ { "lat": 40.99, "lon": -74.44 }
     );
 
     const x = try std.json.parse(Place, &stream, .{});
 
-    debug("\t {} {}\n", .{ x.lat, x.lon });
+    debug("\t{} {}\n", .{ x.lat, x.lon });
 
     // Using stringify to turn data into a string:
 
@@ -47,9 +208,18 @@ fn parsing_json(allocator: *std.mem.Allocator) !void {
     defer string.deinit();
     try std.json.stringify(y, .{}, string.writer());
 
-    debug("\t stringify: {s}\n", .{string.items});
+    debug("\tstringify: {s}\n", .{string.items});
 
-    // TODO using json parser with strings, array and map (which requires an allocator).
+    var another_stream = std.json.TokenStream.init(
+        \\ { "name": "Joe", "age": 25 }
+    );
+
+    const User = struct { name: []u8, age: u16 };
+
+    const z = try std.json.parse(User, &another_stream, .{ .allocator = allocator });
+    defer std.json.parseFree(User, z, .{ .allocator = allocator });
+
+    debug("\tparsing strings: {s} {}\n", .{ z.name, z.age });
 }
 
 fn string_formatting(allocator: *std.mem.Allocator) !void {
