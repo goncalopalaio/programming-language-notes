@@ -14,15 +14,14 @@ pub fn main() anyerror!void {
         std.debug.assert(!leaked);
     }
 
-    if (sdl.SDL_Init(sdl.SDL_INIT_VIDEO) != 0) {
+    if (sdl.SDL_Init(sdl.SDL_INIT_EVERYTHING) != 0) {
         return error.SDLErrorInit;
     }
-}
 
-fn theRest() void {
     // Follows: https://gitlab.com/DonRyuDragoni/mandelbrotgen/-/blob/zig-sdl2/src/state.zig
+
     const title = try std.fmt.allocPrintZ(allocator, "Test? {s}", .{"Hey"});
-    defer allocator.destroy(&title);
+    defer allocator.free(title);
 
     const window_w: c_int = 400;
     const window_h: c_int = 400;
@@ -45,10 +44,20 @@ fn theRest() void {
         while (sdl.SDL_PollEvent(&event) != 0) {
             switch (event.type) {
                 sdl.SDL_QUIT => break :running,
+                sdl.SDL_KEYDOWN => {
+                    switch (event.key.keysym.sym) {
+                        sdl.SDLK_ESCAPE, sdl.SDLK_q => {
+                            break :running;
+                        },
+                        else => {},
+                    }
+                },
                 else => {},
             }
         }
 
         sdl.SDL_RenderPresent(renderer);
     }
+
+    std.log.info("Bye", .{});
 }
