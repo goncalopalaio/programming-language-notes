@@ -1,2 +1,4 @@
 .DS_Store
 zig/zig-cache/
+zig/build-system-test/zig-cache/
+zig/build-system-test/c-test/a.out
