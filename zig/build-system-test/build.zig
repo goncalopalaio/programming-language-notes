@@ -7,6 +7,10 @@ const std = @import("std");
 // export ZIG_SYSTEM_LINKER_HACK=1
 // Until zig linker issues in osx are fixed.
 
+// To debug issues with compilation flags you can use:
+// zig build --verbose
+// and verify if it matches the gcc flags.
+
 pub fn build(b: *std.build.Builder) void {
     // Standard target options allows the person running `zig build` to choose
     // what target to build for. Here we do not override the defaults, which
