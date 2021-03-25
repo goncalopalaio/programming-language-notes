@@ -36,7 +36,7 @@ pub fn main() !void {
 }
 
 fn formatting_specifiers() !void {
-    debug("running iterators\n", .{});
+    debug("running formatting_specifiers\n", .{});
 
     var b: [8]u8 = undefined;
 
