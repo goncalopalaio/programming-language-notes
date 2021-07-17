@@ -32,8 +32,12 @@ let x2 = 0.411
 let x3 = Double(x1) + x2
 print(x3)
 
+
+
 // Logical and Comparison operators
 // == != > >= < <= && || !
+
+
 
 if x2 >= x3 {
     print("x1 >= x3")
@@ -52,7 +56,11 @@ if isPluggedIn || hasBatteryPower {
     print("😱")
 }
 
+
+
 // Switch statement
+
+
 
 let numberOfWheels = 3
 switch numberOfWheels {
@@ -66,14 +74,24 @@ default:
     print("Another vehicle")
 }
 
+
+
 // Ternary conditional operator
+
+
+
 var x4 = 10
 let largest = 100 > x4 ? "larger" : "smaller"
 print(largest)
 let largest2 = max(100, x4)
 print(largest2)
 
+
+
 // Multiline strings
+
+
+
 var longText = """
     Q: Hello?
     A: "Hi"
@@ -105,7 +123,11 @@ print(concatWithOperator)
 
 print("Using interpolation: \(s1) ->\(s2)")
 
+
+
 // String equality and comparison
+
+
 
 if s1 != s2 {
     print("Strings are not the same")
@@ -124,7 +146,11 @@ print("hasSuffix: \(s5.hasSuffix("FDA"))")
 print("contains: \(s5.contains("FDA"))")
 print("count: \(s5.count)")
 
+
+
 // Pattern match with multiple values of strings
+
+
 
 let characterPattern: Character = "e"
 switch characterPattern {
@@ -134,13 +160,22 @@ default:
     print("\(characterPattern) is not a vowel")
 }
 
+
+
 // Unicode
+
+
+
 let cow = "🐮"
 let credentials = "résumé"
 print("Unicode character have the character count you expected even though they are composed of multiple extended grapheme clusters: count will give one.\n\(cow).count = \(cow.count)")
 print("\(credentials).count = \(credentials.count)")
 
+
+
 // Functions
+
+
 
 func thisIsAFunction() {
     print("thisIsAFunction")
@@ -190,7 +225,11 @@ func multiply2(firstNumber: Int) -> Int {
     firstNumber * 200
 }
 
+
+
 // Structs
+
+
 
 struct Person {
     var name: String
@@ -278,7 +317,11 @@ struct Size2 {
 let size = Size2(w: 10.1, h: 20.5)
 let area = size.area()
 
+
+
 // Mutating methods
+
+
 
 struct Odometer2 {
     var count: Int = 0
@@ -291,7 +334,11 @@ var o1 = Odometer2()
 o1.increment()
 print(o1.count)
 
+
+
 // Computed properties
+
+
 
 struct Temp1 {
     var celsius: Double
@@ -309,7 +356,11 @@ let temp1 = Temp1(celsius: 0.0)
 print(temp1.fahrenheit)
 print(temp1.kelvin)
 
+
+
 // Property observers
+
+
 
 struct StepCounter {
     var totalSteps: Int = 0 {
@@ -329,7 +380,11 @@ var sc = StepCounter()
 sc.totalSteps = 40
 sc.totalSteps = 100
 
+
+
 // Type properties and methods
+
+
 
 struct Temp2 {
     static var boilingPoint = 100
@@ -343,7 +398,11 @@ let n1 = Temp2.myName()
 let smallerNumber = Double.minimum(100.0, -1000.0)
 print(smallerNumber)
 
+
+
 // Copying
+
+
 
 // Assigning a struct to a variable or passing an instance as a parameter into a function makes a copy by default
 var someSize = Size2(w: 10, h: 10)
@@ -352,7 +411,11 @@ someSize.h = 30
 print("some \(someSize.h)")
 print("another \(anotherSize.h)")
 
+
+
 // Self
+
+
 
 // note: self is optional
 struct Car {
@@ -370,9 +433,13 @@ struct Car {
 print(Car(color: "Red").description)
 
 // Variable properties
-// Even though struct members are declared as var, if they are instanciated with let they are immutable.
+// Even though struct members are declared as var, if they are instanciated with let they are immutable (but don't forget about mutating func's).
+
+
 
 // Classes and Inheritance
+
+
 
 class Person3 {
     let name: String
@@ -448,7 +515,11 @@ class Student: Subject {
 
 let s10 = Student(name: "Yag", favoriteSubject: "Math")
 
+
+
 // References
+
+
 
 // classes have the ability to references values assined to constants or variables.
 // Contrary to structs where a copy is made, when you assign a class instance to multiple variables, each variable will reference, or point to, the same address in memory.
@@ -458,7 +529,11 @@ s12.favoriteSubject = "Math"
 print(s11.favoriteSubject)
 print(s12.favoriteSubject)
 
+
+
 // Collections
+
+
 
 var arr0: [String] = ["Geq", "Teq"]
 var arr1 = ["Tammy", "Cole"]
@@ -506,7 +581,11 @@ let containerArray = [arr10, arr11]
 let firstArray = containerArray[0]
 let firstElement = containerArray[0][0]
 
+
+
 // Dictionaries
+
+
 
 var scores = ["Cheryl": 500, "Luke": 100, "Big Luke": 500]
 // Empty dictionaries:
@@ -545,7 +624,11 @@ if let cherylScore = scores["Cheryl"] {
     print("Cheryl's score: \(cherylScore)")
 }
 
+
+
 // Loops
+
+
 
 for index in 1...5 {
     print("closed range operator: \(index)")
@@ -584,7 +667,11 @@ for (vehicleName, wheelCount) in vehicles {
     print("A \(vehicleName) has \(wheelCount) wheels")
 }
 
+
+
 // While loops
+
+
 
 var numberOfLives = 3
 var stillAlive = true
@@ -598,8 +685,11 @@ while stillAlive {
 }
 
 
+
 // Repeat-while loops
 // Similar to while but executes the block once before checking the condition
+
+
 
 var steps = 0
 let wall = 2
@@ -625,3 +715,363 @@ for person in people {
     }
     print(person)
 }
+
+
+
+// Optionals
+
+
+
+struct Book {
+    var name: String
+    var publicationYear: Int?
+}
+
+let book1 = Book(name: "Ere", publicationYear: nil)
+let book2 = Book(name: "Fav", publicationYear: 1900)
+
+var serverResponseCode: Int? = nil
+
+// force-unwrap operator !
+if serverResponseCode != nil {
+    let actualResponse = serverResponseCode!
+    print(actualResponse)
+}
+
+if let actualResponse = serverResponseCode {
+    print(actualResponse) // Already unwrapped
+}
+
+
+
+// Functions and Optionals
+
+
+
+let s20 = "123"
+let possibleNumber = Int(s20)
+if let number = possibleNumber {
+    print(number)
+}
+
+func formattedText(url: String) -> String? {
+    if url.count < 10 {
+        return nil
+    }
+    return "heyy \(url)"
+}
+
+if let formattedText = formattedText(url: "") {
+    print(formattedText)
+}
+
+
+
+// Failable Initializers
+
+
+
+struct Toddler {
+    var name: String
+    var monthsOld: Int
+    
+    init?(name: String, monthsOld: Int) {
+        if monthsOld <= 12 || monthsOld > 36 {
+            return nil
+        } else {
+            self.name = name
+            self.monthsOld = monthsOld
+        }
+    }
+}
+
+let toddler = Toddler(name: "Afe", monthsOld: 8)
+if let myToddler = toddler {
+    print("\(myToddler.name) -> \(myToddler.monthsOld)")
+} else {
+    print("Invalid age")
+}
+
+
+
+// Optional Chaining
+
+
+
+struct Person5 {
+    var age: Int
+    var residence: Residence?
+}
+
+struct Residence {
+    var address: Address?
+}
+
+struct Address {
+    var buildingNumber: String
+    var streetName: String
+    var apartmentNumber: String?
+}
+
+let a10 = Person5(age: 10, residence: Residence(address: Address(buildingNumber: "A", streetName: "Foe", apartmentNumber: nil)))
+
+if let theApartmentNumber = a10.residence?.address?.apartmentNumber {
+    print("Apartment number: \(theApartmentNumber)")
+} else {
+    print("No apartment number")
+}
+
+
+
+// Implicitly Unwrapped Optionals
+// To initialize a value later use ! (similar to kotlin lateinit)
+
+
+
+var label: String!
+// label.count // runtime error
+label = "This will be still an optional but it will automatically unwrapped when accessed"
+print(String(label))
+print(label.lowercased())
+
+class Test1 {
+    var content: String
+    init(content: String) {
+        self.content = content
+    }
+}
+
+var t1: Test1!
+t1 = Test1(content: "Hey")
+print(t1.content)
+
+
+
+// Type casting and inspection
+
+
+
+class Animal {
+    var name: String
+    init(name: String) {
+        self.name = name
+    }
+}
+
+class Dog: Animal {
+    func waggle() {
+        print("Waggling my tail")
+    }
+}
+
+class Cat: Animal {
+}
+
+class Bird: Animal {
+}
+
+func getAllAnimals() -> [Animal] {
+    return [Dog(name: "Bud"), Cat(name: "Elf"), Bird(name: "Archie")]
+}
+
+func walk(dog: Dog) {
+    print("Walk \(dog.name)")
+}
+
+func petCat(cat: Cat) {
+    print("Pet \(cat.name)")
+}
+
+func singWith(bird: Bird) {
+    print("Sing with \(bird.name)")
+}
+
+let pets = getAllAnimals()
+
+// Use as? to try to downcast the value to a more specific type
+for pet in pets {
+    if let dog = pet as? Dog {
+        walk(dog: dog)
+    } else if let cat = pet as? Cat {
+        petCat(cat: cat)
+    } else if let bird = pet as? Bird {
+        singWith(bird: bird)
+    }
+}
+
+// Use the forced form of the type cast operator as! to downcast to a specific type. If the type is incorrect the program will crash.
+let alansDog = pets.first(where: {$0.name == "Bud"}) as! Dog
+alansDog.waggle()
+
+
+
+// Any - nonspecific types
+
+
+
+// Any represents an instance of any type.
+// AnyObject represents an instance of any class but not a structure
+var items: [Any] = [5, "Bill", 6.7, true]
+if let firstItem = items[0] as? Int {
+    print(firstItem + 5)
+}
+
+
+// Guard
+
+
+
+// Use guard to better manage control flow.
+// It can be used to get around nested if statements and simplify early return style if statements.
+
+func singHappyBirthday0(birthDayIsToday: Bool, invitedGuests: [String]) {
+    if !birthDayIsToday {
+        print("No birthday today")
+        return
+    }
+    
+    if invitedGuests.isEmpty {
+        print("No guests")
+        return
+    }
+    
+    print("Happy birthday")
+}
+
+func singHappyBirthday1(birthDayIsToday: Bool, invitedGuests: [String]) {
+    guard birthDayIsToday else {
+        print("No birthday today")
+        return
+    }
+    
+    guard !invitedGuests.isEmpty else {
+        print("No guests")
+        return
+    }
+    
+    print("Happy birthday")
+}
+
+
+
+// Guard with optionals
+// 'guard let' makes all unwrapped values available throughout the rest of the function instead of the within control flow braces
+
+
+class Goose {
+    var eggs: Int?
+    init(eggs: Int?) {
+        self.eggs = eggs
+    }
+}
+
+func eggTest() {
+    let goose = Goose(eggs: 10)
+    guard let eggs = goose.eggs else { return }
+    // eggs is accessible hereafter
+    print("The goose laid \(eggs) eggs")
+}
+
+eggTest()
+
+func processBook(title: String?, price: Double?, pages: Int?) {
+    if let theTitle = title,
+       let thePrice = price,
+       let thePages = pages {
+        print("\(theTitle) \(thePrice) \(thePages)")
+    }
+}
+
+func processBook2(title: String?, price: Double?, pages: Int?) {
+    guard let theTitle = title,
+       let thePrice = price,
+       let thePages = pages else {
+        return
+    }
+    print("\(theTitle) \(thePrice) \(thePages)")
+}
+
+
+
+// Constant and Variable Scope
+
+
+
+// You can use the 'if let' syntax and just reuse the original name within the scope of 'if let'
+// Shadowing the optional with the unwrapped value is common in Swift code.
+var name1: String? = "Brady"
+if let name1 = name1 {
+    print("My name is \(name1)")
+}
+
+func exclaim(name: String?) {
+    guard let name = name else {
+        return
+    }
+    
+    print("Exclaim \(name)")
+}
+
+exclaim(name: "Hello")
+
+
+
+// Enumerations
+
+
+
+enum CompassPoint0 {
+    case north
+    case east
+    case south
+    case west
+}
+
+enum CompassPoint {
+    case north, east, south, west
+}
+
+var compassHeading = CompassPoint.east
+compassHeading = .west
+var compassHeading2: CompassPoint = .west
+compassHeading2 = .north
+
+switch compassHeading {
+case .north:
+    print("Going north")
+case .east:
+    print("Going east")
+case .south:
+    print("Going south")
+case .west:
+    print("Going west")
+}
+
+enum AnimalType: Character {
+ case dog = "🐶", cat = "🐱"
+    
+    var definition: String {
+        switch self {
+        case .dog:
+            return "What's up dog"
+        default:
+            return "Other animal"
+        }
+    }
+}
+
+if compassHeading == .west {
+    print("I am heading west")
+}
+
+enum Genre {
+    case animated, action, romance, documentary, biography, thriller
+}
+
+struct Movie {
+    var name: String
+    var releaseYear: Int?
+    var genre: Genre
+}
+
+let movie = Movie(name: "Finding Dory", releaseYear: 2016, genre: .animated)
