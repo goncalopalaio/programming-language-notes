@@ -120,7 +120,9 @@ class ViewController: NSViewController {
                     // print("Received text message: \(text)")
                     DispatchQueue.main.async {
                         self.viewModel.updateWithMessage(message: text)
-                        self.tableView.insertRows(at: IndexSet(integer: 0), withAnimation: .slideUp)
+                        self.tableView.beginUpdates()
+                        self.tableView.insertRows(at: IndexSet(integer: 0), withAnimation: .effectFade)
+                        self.tableView.endUpdates()
                     }
                     
                 case .data(let data):
