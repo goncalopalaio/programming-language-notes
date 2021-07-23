@@ -122,7 +122,7 @@ class ViewController: NSViewController {
                         self.viewModel.updateWithMessage(message: text)
                         self.tableView.beginUpdates()
                         self.tableView.insertRows(at: IndexSet(integer: 0), withAnimation: .effectFade)
-                        self.tableView.endUpdates()
+                        self.tableView.beginUpdates()
                     }
                     
                 case .data(let data):
