@@ -2,6 +2,7 @@ fn main() {
     println!("Hello!");
     variables();
     data_type_exploration();
+    data_collections();
 }
 
 fn variables() {
@@ -74,4 +75,41 @@ fn data_type_exploration() {
     let string_1 = "Banana"; // Creates a reference (&str) to the str data type.
     let string_2: &str = "Pineapple";
     println!("{} {}", string_1, string_2);
+}
+
+fn data_collections() {
+    // Tuples
+    let e = ('E', 5i32, true);
+    let d: (char, i32, bool) = ('E', 5i32, true);
+
+    println!("{} {} {}", e.0, e.1, e.2);
+    println!("{} {} {}", d.0, d.1, d.2);
+
+    // Structs
+    // Type composed of other types. The elements are called fields.
+    // Three struct types:
+    // Classic C structs    -> Each field has a name and data type.
+    // Tuple structs        -> Similar to Classic C structs but fields don't have names.
+    // Unit structs         -> Most commonly used as markers (useful for Rust's traits).
+
+    struct Student {
+        name: String,
+        level: u8,
+        remote: bool,
+    }
+
+    struct Grades(char, char, char, f32);
+
+    // struct UnitExample;
+
+    // How to instantiate.
+    let user = Student {
+        name: String::from("Cabbage"),
+        remote: true,
+        level: 32,
+    };
+    let mark = Grades('A', 'A', 'A', 3.2);
+
+    println!("{} {} {}", user.name, user.remote, user.level);
+    println!("{} {} {} {}", mark.0, mark.1, mark.2, mark.3);
 }
