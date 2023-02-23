@@ -3,6 +3,7 @@ fn main() {
     variables();
     data_type_exploration();
     data_collections();
+    enum_types_for_compound_data();
 }
 
 fn variables() {
@@ -102,7 +103,7 @@ fn data_collections() {
 
     // struct UnitExample;
 
-    // How to instantiate.
+    // How to instantiate:
     let user = Student {
         name: String::from("Cabbage"),
         remote: true,
@@ -112,4 +113,45 @@ fn data_collections() {
 
     println!("{} {} {}", user.name, user.remote, user.level);
     println!("{} {} {} {}", mark.0, mark.1, mark.2, mark.3);
+}
+
+fn enum_types_for_compound_data() {
+    #[allow(dead_code)] // Unused
+    enum WebEvent {
+        // Enum variant can be like a unit struct.
+        WeLoad,
+        // Enum variant can be like a tuple struct.
+        WeKeys(String, char),
+        // Enum variant can be like a classic struct.
+        WeClick { x: i64, y: i64 },
+    }
+
+    #[derive(Debug)]
+    struct KeyPress(String, char);
+
+    #[derive(Debug)]
+    struct MouseClick {
+        x: i64,
+        y: i64,
+    }
+
+    #[derive(Debug)]
+    enum Event {
+        WeLoad(bool),
+        WeClick(MouseClick),
+        WeKeys(KeyPress),
+    }
+
+    // How to instantiate:
+
+    let click = MouseClick { x: 100, y: 300 };
+    let keys = KeyPress(String::from("Ctrl+"), 'N');
+    println!("{} {} {} {}", &click.x, &click.y, &keys.0, &keys.1);
+
+    let w = Event::WeLoad(true);
+    let c = Event::WeClick(click);
+    let k = Event::WeKeys(keys);
+
+    // Using #[derive(Debug)] to print the struct content using {:#?}.
+    println!("{:#?} {:#?} {:#?}", w, c, k);
 }
