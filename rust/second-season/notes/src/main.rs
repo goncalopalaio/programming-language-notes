@@ -4,6 +4,8 @@ fn main() {
     data_type_exploration();
     data_collections();
     enum_types_for_compound_data();
+    functions();
+    exercise_build_a_car();
 }
 
 fn variables() {
@@ -154,4 +156,62 @@ fn enum_types_for_compound_data() {
 
     // Using #[derive(Debug)] to print the struct content using {:#?}.
     println!("{:#?} {:#?} {:#?}", w, c, k);
+}
+
+fn functions() {
+    fn goodbye(message: &str) {
+        println!("{}", message);
+    }
+    goodbye("Bye!");
+
+    fn divide_by_5(num: u32) -> u32 {
+        if num == 0 {
+            return 0;
+        }
+        num / 5
+    }
+
+    let num = 5;
+    println!("{}", divide_by_5(num));
+}
+
+fn exercise_build_a_car() {
+    // Declare Car struct to describe vehicle with four named fields
+    struct Car {
+        color: String,
+        transmission: Transmission,
+        convertible: bool,
+        mileage: u32,
+    }
+
+    #[allow(dead_code)] // Some fields are unused
+    #[derive(PartialEq, Debug)]
+    // Declare enum for Car transmission type
+    enum Transmission {
+        // todo!("Fix enum definition so code compiles");
+        Manual,
+        SemiAuto,
+        Automatic,
+    }
+
+    // Build a "Car" by using values from the input arguments
+    // - Color of car (String)
+    // - Transmission type (enum value)
+    // - Convertible (boolean, true if car is a convertible)
+    fn car_factory(color: String, transmission: Transmission, convertible: bool) -> Car {
+        // Use the values of the input arguments
+        // All new cars always have zero mileage
+        Car {
+            color: color,
+            transmission: transmission,
+            convertible: convertible,
+            mileage: 2000,
+        }
+    }
+
+    let car = car_factory(String::from("Red"), Transmission::Automatic, false);
+    println!(
+        "Car = {}, {:?} transmission, convertible: {}, mileage: {}",
+        car.color, car.transmission, car.convertible, car.mileage
+    );
 }
