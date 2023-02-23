@@ -4,8 +4,12 @@ fn main() {
     data_type_exploration();
     data_collections();
     enum_types_for_compound_data();
+
     functions();
     exercise_build_a_car();
+
+    create_and_use_arrays();
+    vector_data_types();
 }
 
 fn variables() {
@@ -214,4 +218,43 @@ fn exercise_build_a_car() {
         "Car = {}, {:?} transmission, convertible: {}, mileage: {}",
         car.color, car.transmission, car.convertible, car.mileage
     );
+}
+
+fn create_and_use_arrays() {
+    let days = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thrusday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+    ];
+
+    let zeros = [0; 5]; // 5 zeroes
+    let ones: [u32; 6] = [1; 6];
+
+    let first_day = days[0];
+    println!(
+        "{} {} {} {} {}",
+        first_day, days[1], days[2], zeros[0], ones[0]
+    );
+}
+
+fn vector_data_types() {
+    // Unlike arrays, vectors can grow or shrink at any time
+
+    let three_nums = vec![15, 3, 654];
+    let zeros = vec![0; 5];
+    println!("{:?} {:?}", three_nums, zeros);
+
+    let mut fruit = Vec::new();
+    fruit.push("Apple");
+    fruit.push("Banana");
+    fruit.push("Cherry");
+    println!("{:?}", fruit);
+    fruit.pop();
+    fruit.pop();
+    fruit[0] = "Pineapple";
+    println!("{:?} {}", fruit, fruit[0]);
 }
