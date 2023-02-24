@@ -11,6 +11,8 @@ fn main() {
     create_and_use_arrays();
     vector_data_types();
     exercise_compound_types();
+
+    if_else_conditions();
 }
 
 fn variables() {
@@ -331,4 +333,36 @@ fn exercise_compound_types() {
         "Car order 3: {:?}, Hard top = {}, {:?}, {}, {} miles",
         car.age.0, car.roof, car.motor, car.color, car.age.1
     );
+}
+
+fn if_else_conditions() {
+    if 1 == 2 {
+        println!("Numbers are equal");
+    } else {
+        println!("Numbers are not equal");
+    }
+
+    let formal = true;
+    let greeting = if formal { "Good day" } else { "Hey" };
+    println!("{}", greeting);
+
+    let num = 500;
+    let out_of_range: bool;
+    if num < 0 {
+        out_of_range = false;
+    } else if num == 0 {
+        out_of_range = false;
+    } else {
+        out_of_range = true;
+    }
+
+    let out_of_range = if num < 0 {
+        false
+    } else if num == 0 {
+        false
+    } else {
+        true
+    };
+
+    println!("{}", out_of_range);
 }
