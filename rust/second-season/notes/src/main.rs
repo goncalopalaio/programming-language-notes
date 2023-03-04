@@ -16,6 +16,8 @@ fn main() {
 
     hashmaps();
     exercise_hashmaps();
+
+    loops();
 }
 
 fn variables() {
@@ -517,4 +519,38 @@ fn exercise_hashmaps() {
         "{}: {:?}, Hard top = {}, {:?}, {}, {} miles",
         order, car.age.0, car.roof, car.motor, car.color, car.age.1
     );
+}
+
+fn loops() {
+    let mut counter = 1;
+
+    let stop_count = loop {
+        counter *= 2;
+        if counter > 100 {
+            break counter;
+        }
+    };
+
+    println!("Counter at the end: {}", stop_count);
+
+    while counter < 256 {
+        counter = counter + 1;
+    }
+
+    println!("Counter: {}", counter);
+
+    let big_birds = ["ostrish", "peacock", "stork"];
+    for bird in big_birds {
+        // &str
+        println!("Bird: {bird}");
+    }
+
+    for bird in big_birds.iter() {
+        // &&str
+        println!("Bird: {bird}");
+    }
+
+    for number in 0..5 {
+        println!("Number: {number}");
+    }
 }
