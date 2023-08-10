@@ -151,3 +151,142 @@ say 2 R/ 3; # 1.5
 
 say 2 - 1; # 1
 say 2 R- 1; # -1
+
+say 6 Rgcd 9;
+# say "Hello " Rx 3; # Doesn't work
+say 13 x 3;
+say 13 Rx 3;
+
+say 3 R<=> 2;
+
+say "# Variables";
+# 3 Categories: Scalars, Arrays and Hashes
+# A sigil is a character that is used as a prefix to categorize variables
+# $ for scalars
+# @ for arrays
+# % for hashes
+
+# A scalar holds one value or reference
+{
+    my $name = "John Doe";
+    say $name;
+
+    my $age = 99;
+    say $age;
+}
+{
+    # https://docs.raku.org/type/Str
+
+    my $name = "John Doe";
+
+    say $name.uc; # Uppercase
+    say uc $name;
+
+    say $name.chars; # Number of chars
+    say $name.flip; # Reverse string
+}
+
+{
+    # https://docs.raku.org/type/Int
+    # https://docs.raku.org/type/Rat (Rational numbers)
+
+    my $age = 2.3;
+    say $age.numerator; # 23
+    say $age.denominator; # 10
+    say $age.nude; # Returns a list of the numerator and denominator, (23 10)
+}
+
+say "# Arrays";
+{
+    # https://docs.raku.org/type/Array
+
+    my @animals = "camel", "llama", "owl";
+    say @animals;
+}
+
+{
+    my @vegetables = "potato", "carrot", "onion";
+    my $rock = "Marble";
+
+    say @vegetables;
+    say $rock;
+
+    say "1 - " ~ @vegetables ~ " and $rock";
+    say "2 - @vegetables and $rock";
+    {
+        my @vegetables = "potato", "carrot", "onion";
+        my $rock = "Marble";
+        my $thing = @vegetables;
+
+        say "3 - " ~ $thing ~ " and $rock";
+        say "4 - $thing and $rock";
+        say "5 - $@vegetables and $rock";
+    }
+}
+
+{
+    my @animals = "camel", "llama", "owl";
+    say "Contains " ~ @animals.elems ~ " animals";
+    @animals.push("dog");
+
+    say "-> " ~ @animals;
+    @animals.pop;
+    say "-> " ~ @animals;
+    say "-> " ~ @animals.splice(1, 2); # Will remove b elements starting at position a
+
+}
+
+say "# Fixed size arrays";
+{
+    # https://docs.raku.org/type/Array
+
+    my @array[3];
+    @array[0] = "first";
+    @array[1] = "second";
+    @array[2] = "third";
+    # @array[3] = "fourth"; # Out of range error
+    @array.say;
+}
+
+say "# Multidimentional arrays";
+{
+    my @tbl[3; 2];
+    @tbl[0; 0] = 1;
+    @tbl[0; 1] = "x";
+    @tbl[1; 0] = 2;
+    @tbl[1; 1] = "y";
+    @tbl[2; 0] = 3;
+    @tbl[2; 1] = "z";
+    @tbl.say;
+}
+
+say "# Hashes";
+{
+    my %capitals = "UK", "London", "Germany", "Berlin";
+    %capitals.say;
+
+    # Another way:
+    {
+        my %capitals1 = "UK" => "London", "Germany" => "Berlin";
+        %capitals1.say;
+
+        my %capitals2 = UK => "London", Germany => "Berlin";
+        %capitals2.say;
+    }
+}
+
+{
+    my %capitals = UK => "London", Germany => "Berlin";
+    %capitals.push: (France => "Paris");
+    say %capitals.kv;
+    %capitals.kv.say;
+    %capitals.keys.say;
+    %capitals.values.say;
+
+    say "Capital of France: " ~ %capitals<France>;
+}
+
+say "# Types";
+{
+
+}
