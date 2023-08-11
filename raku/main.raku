@@ -262,6 +262,7 @@ say "# Multidimentional arrays";
 
 say "# Hashes";
 {
+    # https://docs.raku.org/type/Hash
     my %capitals = "UK", "London", "Germany", "Berlin";
     %capitals.say;
 
@@ -288,5 +289,105 @@ say "# Hashes";
 
 say "# Types";
 {
+    # Raku is classified as gradually typed. It allows both static and dynamic typing
+    {
+        # Dynamic typing
+        my $var = "Text";
+        say $var;
+        say $var.WHAT; # Returns type
+        $var = 1234;
+        say $var;
+        say $var.WHAT;
+    }
+    {
+        # Static typing
+        my Int $var1 = 1234;
+        say $var1;
+        say $var1.WHAT;
 
+        # my Int $var2 = "Text"; # This fails
+
+        # Arrays and hashes can also be statically typed
+        my Int @array = 1, 2, 3;
+        say @array.WHAT;
+
+        my Str @multilingual = "Hello","Salut","Hallo","您好","안녕하세요","こんにちは";
+        say @multilingual.WHAT;
+
+        my Str %capitals = UK => 'London', Germany => 'Berlin';
+        say %capitals.WHAT;
+
+        # Other commonly used types:
+        # Mu - root of the Raku type hierarchy
+        # Any - Default base class for new classes and for most built-in classes
+        # Cool - Value that can be treated as a string or a number interchangeably
+        my Cool $var = 31; say $var.flip; say $var * 2;
+        # Str - String of characters
+        # Int - Integer (arbitrary-precision)
+        # Rat - Rational number (limited-precision)
+        # Bool - Boolean
+    }
+}
+
+say "# Introspection";
+{
+    my Int $var;
+    say $var.WHAT;
+
+    my $var2;
+    say $var2.WHAT; # Any
+    $var2 = True;
+    say $var2.WHAT; # Boolean
+    $var2 = Nil;
+    say $var2.WHAT; # Any
+
+}
+
+say "# Assignment vs Binding";
+{
+    # https://docs.raku.org/language/variables
+
+    # Assignment is done with the = operator
+    # The value can be changed
+    my Int $var = 123;
+    $var = 999;
+    say $var;
+
+    # A value bound to a variable cannot be changed
+    my Int $var2 := 1234;
+    # $var = 999; # This fails
+    say $var2;
+
+    # Variables can also be bound to other variables
+    my $a;
+    my $b;
+    $b := $a;
+    $a = 7;
+    say $a; # 7
+    say $b; # 7
+    $b = 8;
+    say $a; # 8
+    say $b; # 8
+    # Binding variables is bi-directional - $a := $b and $b := $a have the same effect
+}
+
+say "# Functions and mutators";
+{
+    # Functions do not change the state of the object they were called on
+    # Mutators modify the state of the object
+
+    my @numbers = [1, 4, 2, 0];
+    @numbers.push(99); # push is a mutator
+    say @numbers;
+    @numbers.sort; # sort is a function, it returns the sorted array but it doesn't modify the state of the initial array
+    say @numbers;
+
+    # To enforce a function to act as a mutator, .= is used instead of .
+    @numbers.=sort;
+    say @numbers;
+}
+
+say "# Loops and conditions";
+{
+    
 }
