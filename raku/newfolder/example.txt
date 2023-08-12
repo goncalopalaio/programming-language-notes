@@ -1,0 +1,5 @@
+New scores:
+    Potato 10
+    Orange 10
+    Carrot 20
+    

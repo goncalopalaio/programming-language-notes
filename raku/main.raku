@@ -10,6 +10,9 @@ say "# Blocks are collections of statements";
 {
     say "1st";
     say "2nd";
+    print "h";
+    print "i";
+    print "!\n";
 }
 
 # Expressions
@@ -388,6 +391,183 @@ say "# Functions and mutators";
 }
 
 say "# Loops and conditions";
+
 {
-    
+    say "# if";
+
+    my $age = 19;
+
+    if $age > 18 {
+        say "Welcome";
+    }
+
+    # You can also invert the body and condition
+    say "Welcome" if $age > 18;
+
+    my $number-of-seats = 9;
+    if $number-of-seats <= 5 {
+        say "I am a sedan";
+    } elsif $number-of-seats <= 7 {
+        say "I am a 7 seater";
+    } else {
+        say "I am a van"
+    }
+
+    say "# unless";
+
+    my $clean-shoes = False;
+    if not $clean-shoes { # Negation is done either with ! or not
+        say "Clear your shoes"
+    }
+
+    unless $clean-shoes {
+        say "Clean your shoes"
+    }
+
+    say "# with";
+    # behaves like an if statement but checks if the variable is defined
+    my Int $var = 1;
+    with $var {
+        say "Hello";
+    }
+
+    my $var0 = 1;
+    my $var1;
+    with $var1 {
+        say "1 - Hello";
+    } orwith $var0 {
+        say "2 - Hi?";
+    } else {
+        say "3 - What?";
+    }
+
+    my Int $var2;
+    with $var2 {
+        say "Bye"; # This will not be called
+    }
+
+    say "# without";
+    without $var2 {
+        say "Hi!"; # without is the negated version of with
+    }
+}
+
+{   
+    # https://docs.raku.org/language/control
+
+    say "# for";
+    my @array = 1, 2, 3;
+    for @array -> $array-item {
+        say $array-item * 100;
+    }
+
+    say "# loop";
+    loop (my $i = 0; $i < 5; $i++) {
+        say "Number is $i";
+    }
+
+    say "# repeat while";
+    my $x = -42;
+    repeat {
+        $x++;
+    } while $x < 5;
+    $x.say;
+
+    repeat {
+        $x++;
+    } until $x >= 5;
+    $x.say;
+
+    until $x > 10 {
+        say $x++;
+    }
+}
+
+{
+    say "# given";
+    my $var = 42;
+
+    given $var {
+        when 0..50 { say "<= 50" } # Stops at first match
+        when Int { say "It's an Int" }
+        when 42 { say 42 }
+        default { say "huh?" }
+    }
+
+    # proceed can be used to continue matching
+    given $var {
+        when 0..50 { say "<= 50"; proceed }
+        when Int { say "It's an Int"; proceed }
+        when 42 { say 42 }
+        default { say "huh?" }
+    }
+}
+
+say "# Basic I/O using the terminal";
+{
+    say "Hello";
+    print "hi\n";
+
+    # get is used to capture input from the terminal
+    my $name;
+    $name = "";
+    # $name = get;
+    $name.say;
+
+    # prompt is a combination of print and get
+    # $name = prompt "Hi, what's your name? ";
+    say "Hi $name";
+}
+
+say "# Running shell commands";
+{
+    # run runs an external command without involving a shell
+    # shel runs a command through the system shell.
+
+    my $name = "Neo";
+    run 'echo', "Hello $name";
+    shell "ls";
+}
+
+say "# File I/O";
+{
+    # slurp to read data from a file
+    my $data = slurp "README.md";
+    say $data;
+
+    # spurt to write data to a file
+    my $newdata = "New scores:
+    Potato 10
+    Orange 10
+    Carrot 20
+    \n";
+    spurt "example.txt", $newdata;
+}
+
+say "# Working with files and directories";
+{
+    # https://docs.raku.org/type/IO
+
+    # Contents of a directory can be listed without resorting to shell command
+    say dir;
+    say dir "../";
+
+    my $folder = "newfolder";
+    my $file = "example.txt";
+    my $moved-file = "$folder/$file";
+    rmdir $folder;
+    mkdir $folder;
+    move $file, $moved-file;
+
+    if $folder.IO.e {
+        say "$folder exists";
+    }
+
+    say $folder.IO.f; # Checks if it's a file
+    say $moved-file.IO.f;
+
+    say $folder.IO.d; # Checks if it's a directory
+    say $moved-file.IO.d;
+
+
 }
