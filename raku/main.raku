@@ -568,6 +568,85 @@ say "# Working with files and directories";
 
     say $folder.IO.d; # Checks if it's a directory
     say $moved-file.IO.d;
+}
 
+say "# Subroutines";
+{
+    sub alien-greeting {
+        say "Hello earthlings";
+    }
+
+    alien-greeting;
+
+    # Arguments
+
+    sub say-hello(Str $name) {
+        say "Hello" ~ $name ~ "!!!!";
+    }
+
+    say-hello "Paul";
+    say-hello "Paula";
+}
+
+say "# Multiple dispatch";
+{
+    # You can define multiple subroutines that have the same name but different signatures
+
+    multi greet($name) {
+        say "Good morning $name";
+    }
+
+    multi greet($name, $title) {
+        say "Good morning $title $name";
+    }
+
+    greet "Johnnie";
+    greet "Laura", "Mrs.";
+}
+
+say "# Default and optional parameters";
+{
+    sub say-hello($name?) {
+        with $name { say "Hello " ~ $name }
+        else { say "Hello Human" }
+    }
+
+    say-hello;
+    say-hello "Laura";
+
+    sub say-hello-two($name="Matt") {
+        say "Hello " ~ $name;
+    }
+    
+    say-hello-two;
+    say-hello-two "Laura";
+}
+
+say "# Returning values";
+{
+    # Implicit return
+    sub squared($x) {
+        $x ** 2;
+    }
+    say "7 squared = " ~ squared(7);
+
+    # Explicit return
+    sub squared-two($x) {
+        return $x ** 2;
+    }
+    say "7 squared = " ~ squared-two(7);
+
+    # Indicating return type
+    sub squared-three($x --> Int) {
+        return $x ** 2;
+    }
+
+    # say "1.2 squared is equal to " ~  squared-three(1.2); # This fails at runtime since it returns a rational number and not an integer
+
+    # You can also specify if the returned value must be defined or not.
+    sub squared-what ($x --> Int:D) {
+    return $x ** 2;
+    }
+    say "squared-what to " ~ squared-what(1);
 
 }
